@@ -122,6 +122,32 @@
         }
         #viz-container:active { cursor: grabbing; }
 
+        .week-selector { display: flex; gap: 0.5rem; margin-top: 1rem; justify-content: center; }
+        .week-btn {
+            padding: 0.5rem 1.25rem;
+            border: 2px solid var(--tan);
+            border-radius: 8px;
+            background: var(--white);
+            color: var(--brown-dark);
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .week-btn:hover { border-color: var(--forest-green); background: var(--cream-light); }
+        .week-btn.active {
+            border-color: var(--forest-green);
+            background: var(--forest-green);
+            color: var(--white);
+        }
+        .week-description {
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--brown-medium);
+            margin-top: 0.5rem;
+            font-style: italic;
+        }
+
         .viz-legend { display: flex; gap: 1.5rem; margin-top: 0.75rem; font-size: 0.8rem; color: var(--brown-medium); flex-wrap: wrap; }
         .viz-legend-item { display: flex; align-items: center; gap: 0.4rem; }
         .viz-legend-color { width: 12px; height: 12px; border-radius: 2px; }
@@ -241,6 +267,14 @@
                     <span class="viz-stats" id="viz-stats">Drag to rotate</span>
                 </div>
                 <div id="viz-container"></div>
+                <div class="week-selector">
+                    <button class="week-btn active" data-week="1">Week 1</button>
+                    <button class="week-btn" data-week="2">Week 2</button>
+                    <button class="week-btn" data-week="3">Week 3</button>
+                </div>
+                <div class="week-description" id="week-description">
+                    First batch enters fruiting chamber (no pins yet)
+                </div>
                 <div class="viz-legend">
                     <div class="viz-legend-item">
                         <div class="viz-legend-color" style="background: #d9bf90;"></div>
@@ -248,11 +282,15 @@
                     </div>
                     <div class="viz-legend-item">
                         <div class="viz-legend-color" style="background: #888;"></div>
-                        <span>Wire shelving (18" deep)</span>
+                        <span>Wire shelving</span>
                     </div>
                     <div class="viz-legend-item">
                         <div class="viz-legend-color" style="background: #f5f5f5;"></div>
                         <span>Substrate blocks</span>
+                    </div>
+                    <div class="viz-legend-item">
+                        <div class="viz-legend-color" style="background: #8a9bab;"></div>
+                        <span>Fruiting</span>
                     </div>
                 </div>
             </div>
@@ -442,6 +480,7 @@
         let currentYield = 3;
         let currentBlockSize = 5;
         let currentBE = 70;
+        let currentWeek = 1;
         let currentCalcData = null;
 
         // ============================================================
@@ -727,8 +766,8 @@
                 metalness: 0.0
             });
 
-            // Scale mushrooms to block size (caps 3-5 inches)
-            const baseCapSize = Math.max(blockW, blockD) * 0.35;
+            // Scale mushrooms to be almost as large as the block
+            const baseCapSize = Math.max(blockW, blockD) * 0.8;
 
             // Create 5-8 mushrooms in cluster
             const numMushrooms = 5 + Math.floor(Math.random() * 4);
@@ -915,25 +954,53 @@
                     // Place blocks on this shelf
                     for (let row = 0; row < shelf.blocksDeep && blocksPlaced < blocksNeeded; row++) {
                         for (let col = 0; col < shelf.blocksWide && blocksPlaced < blocksNeeded; col++) {
-                            const blockMesh = new THREE.Mesh(blockGeometry, blockMat);
+                            // Determine if this block should be shown and if it should have mushrooms
+                            // based on current week (staggered batch system)
+                            const blockIndex = blocksPlaced;
+                            const halfPoint = Math.ceil(blocksNeeded / 2);
+                            const isFirstHalf = blockIndex < halfPoint;
 
-                            const bx = shelfX - shelfW/2 + (blockW + spacing)/2 + col * (blockW + spacing);
-                            const bz = shelfZ - shelfD/2 + (blockD + spacing)/2 + row * (blockD + spacing);
-                            const by = shelfY + blockH/2 + 0.02;
+                            let showBlock = false;
+                            let showMushrooms = false;
 
-                            blockMesh.position.set(bx, by, bz);
-                            tentGroup.add(blockMesh);
+                            if (currentWeek === 1) {
+                                // Week 1: first half enters, no mushrooms yet
+                                showBlock = isFirstHalf;
+                                showMushrooms = false;
+                            } else if (currentWeek === 2) {
+                                // Week 2: all blocks, first half fruiting
+                                showBlock = true;
+                                showMushrooms = isFirstHalf;
+                            } else {
+                                // Week 3: all blocks, second half fruiting
+                                showBlock = true;
+                                showMushrooms = !isFirstHalf;
+                            }
 
-                            // Add mushroom cluster - face towards walking path
-                            const facing = shelf.facing || 0;
-                            const mushrooms = createMushroomCluster(blockW, blockH, blockD, facing);
+                            if (showBlock) {
+                                const blockMesh = new THREE.Mesh(blockGeometry, blockMat);
 
-                            // Position mushrooms on the side facing the walkway
-                            const mushroomOffset = blockD / 2 + 0.02;
-                            const mx = bx + Math.sin(facing) * mushroomOffset;
-                            const mz = bz + Math.cos(facing) * mushroomOffset;
-                            mushrooms.position.set(mx, by - blockH * 0.1, mz);
-                            tentGroup.add(mushrooms);
+                                const bx = shelfX - shelfW/2 + (blockW + spacing)/2 + col * (blockW + spacing);
+                                const bz = shelfZ - shelfD/2 + (blockD + spacing)/2 + row * (blockD + spacing);
+                                const by = shelfY + blockH/2 + 0.02;
+
+                                blockMesh.position.set(bx, by, bz);
+                                tentGroup.add(blockMesh);
+
+                                if (showMushrooms) {
+                                    // Add mushroom cluster - face towards center of tent
+                                    const facing = shelf.facing || 0;
+                                    const mushrooms = createMushroomCluster(blockW, blockH, blockD, facing);
+
+                                    // Position mushrooms on the side facing the center
+                                    // Use negative sin for correct X direction
+                                    const mushroomOffset = blockD / 2 + 0.02;
+                                    const mx = bx - Math.sin(facing) * mushroomOffset;
+                                    const mz = bz + Math.cos(facing) * mushroomOffset;
+                                    mushrooms.position.set(mx, by - blockH * 0.1, mz);
+                                    tentGroup.add(mushrooms);
+                                }
+                            }
 
                             blocksPlaced++;
                         }
@@ -951,10 +1018,21 @@
             camera.position.set(maxDim * 1.3, maxDim * 1.0, maxDim * 1.5);
             camera.lookAt(0, h * 0.35, 0);
 
-            // Update stats
-            const utilizationPct = Math.round((blocksNeeded / config.capacity) * 100);
+            // Update stats based on week
+            const halfPoint = Math.ceil(blocksNeeded / 2);
+            let visibleBlocks, fruitingBlocks;
+            if (currentWeek === 1) {
+                visibleBlocks = halfPoint;
+                fruitingBlocks = 0;
+            } else if (currentWeek === 2) {
+                visibleBlocks = blocksNeeded;
+                fruitingBlocks = halfPoint;
+            } else {
+                visibleBlocks = blocksNeeded;
+                fruitingBlocks = blocksNeeded - halfPoint;
+            }
             document.getElementById('viz-stats').textContent =
-                `${blocksPlaced}/${config.capacity} blocks · ${utilizationPct}% utilized`;
+                `Week ${currentWeek}: ${visibleBlocks} blocks, ${fruitingBlocks} fruiting`;
         }
 
         // ============================================================
@@ -1135,6 +1213,26 @@
                 btn.classList.add('active');
                 currentBlockSize = parseInt(btn.dataset.size);
                 calculate();
+            });
+        });
+
+        // Week selector buttons
+        const weekBtns = document.querySelectorAll('.week-btn');
+        const weekDescriptions = {
+            1: 'First batch enters fruiting chamber (no pins yet)',
+            2: 'First batch fruiting, second batch enters',
+            3: 'First batch harvested, second batch fruiting'
+        };
+
+        weekBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                weekBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentWeek = parseInt(btn.dataset.week);
+                document.getElementById('week-description').textContent = weekDescriptions[currentWeek];
+                if (currentCalcData) {
+                    update3DViz(currentCalcData);
+                }
             });
         });
 
