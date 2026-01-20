@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fruiting Chamber Calculator | Heartwood Mushrooms</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         :root {
             --brown-dark: #3b281e;
@@ -193,6 +194,64 @@
 
         .size-btn.active .size-title {
             color: var(--forest-green);
+        }
+
+        /* 3D Visualization */
+        .viz-section {
+            padding: 1.5rem 2rem;
+            background: var(--cream-light);
+            border-top: 1px solid var(--cream);
+        }
+
+        .viz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .viz-header h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--brown-dark);
+        }
+
+        .viz-stats {
+            font-size: 0.85rem;
+            color: var(--brown-medium);
+        }
+
+        #viz-container {
+            width: 100%;
+            height: 300px;
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: grab;
+            background: linear-gradient(135deg, #2a3a1f 0%, #1a2612 100%);
+        }
+
+        #viz-container:active {
+            cursor: grabbing;
+        }
+
+        .viz-legend {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 0.75rem;
+            font-size: 0.8rem;
+            color: var(--brown-medium);
+        }
+
+        .viz-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .viz-legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
         }
 
         .results-section {
@@ -385,6 +444,15 @@
             .result-card .value {
                 font-size: 1.2rem;
             }
+
+            #viz-container {
+                height: 250px;
+            }
+
+            .viz-legend {
+                flex-wrap: wrap;
+                gap: 0.75rem;
+            }
         }
     </style>
 </head>
@@ -440,6 +508,33 @@
                 </div>
             </div>
 
+            <!-- 3D Visualization Section -->
+            <div class="viz-section">
+                <div class="viz-header">
+                    <h3>Chamber Layout</h3>
+                    <span class="viz-stats" id="viz-stats">Drag to rotate</span>
+                </div>
+                <div id="viz-container"></div>
+                <div class="viz-legend">
+                    <div class="viz-legend-item">
+                        <div class="viz-legend-color" style="background: #d9bf90;"></div>
+                        <span>Tent frame</span>
+                    </div>
+                    <div class="viz-legend-item">
+                        <div class="viz-legend-color" style="background: #888;"></div>
+                        <span>Shelving</span>
+                    </div>
+                    <div class="viz-legend-item">
+                        <div class="viz-legend-color" style="background: #f5f5f5;"></div>
+                        <span>Substrate blocks</span>
+                    </div>
+                    <div class="viz-legend-item">
+                        <div class="viz-legend-color" style="background: rgba(90, 122, 61, 0.3);"></div>
+                        <span>Walkway</span>
+                    </div>
+                </div>
+            </div>
+
             <div class="results-section">
                 <div class="results-header">
                     <h2>BATCH SETUP</h2>
@@ -455,7 +550,7 @@
                     </div>
                     <div class="result-card">
                         <div class="label">Chamber Size</div>
-                        <div class="value" id="chamber-value">16 ft3</div>
+                        <div class="value" id="chamber-value">16 ft³</div>
                         <div class="detail" id="chamber-detail">2' x 2' x 4' tent</div>
                     </div>
                     <div class="result-card">
@@ -499,7 +594,11 @@
                         </div>
                         <div class="spec-row">
                             <span class="spec-label">Chamber</span>
-                            <span class="spec-value" id="spec-chamber">2' x 2' x 4' (16 ft3)</span>
+                            <span class="spec-value" id="spec-chamber">2' x 2' x 4' (16 ft³)</span>
+                        </div>
+                        <div class="spec-row">
+                            <span class="spec-label">Usable space</span>
+                            <span class="spec-value" id="spec-usable">85% (13.6 ft³)</span>
                         </div>
                         <div class="spec-row">
                             <span class="spec-label">FAE</span>
@@ -523,7 +622,7 @@
                         </div>
                         <div class="spec-row">
                             <span class="spec-label">Temperature</span>
-                            <span class="spec-value">18-21C</span>
+                            <span class="spec-value">18-21°C</span>
                         </div>
                     </div>
                 </div>
@@ -553,27 +652,28 @@
         const DRY_MASS_RATIO = 0.4;  // 40% dry fraction
         const PRODUCTION_WEEKS = 3;  // weeks of production per cycle
         const CYCLE_WEEKS = 4;       // total weeks including cleaning
-        const SPACE_PER_BLOCK_5LB = 2.5;  // ft3
-        const SPACE_PER_BLOCK_10LB = 4.0; // ft3 (larger blocks need more room)
+        const SPACE_PER_BLOCK_5LB = 2.5;  // ft³
+        const SPACE_PER_BLOCK_10LB = 4.0; // ft³ (larger blocks need more room)
         const AIR_EXCHANGES_PER_HOUR = 5;
-        const MOISTURE_CONTENT_85RH = 14.5;  // g/m3 at 20C, 85% RH
+        const MOISTURE_CONTENT_85RH = 14.5;  // g/m³ at 20°C, 85% RH
         const DISC_LIFE_HOURS_MIN = 2500;
         const DISC_LIFE_HOURS_MAX = 3500;
 
-        // Tent sizes (common grow tents)
+        // Tent sizes with utilization factors (accounting for walkways)
+        // Small tents: reach from door. Large tents: need aisles for access/harvest
         const TENT_SIZES = [
-            { dims: "2' x 2' x 4'", ft3: 16, m3: 0.45 },
-            { dims: "2' x 2' x 5'", ft3: 20, m3: 0.57 },
-            { dims: "2' x 4' x 5'", ft3: 40, m3: 1.13 },
-            { dims: "3' x 3' x 6'", ft3: 54, m3: 1.53 },
-            { dims: "4' x 2' x 6'", ft3: 48, m3: 1.36 },
-            { dims: "4' x 4' x 6.5'", ft3: 104, m3: 2.94 },
-            { dims: "4' x 4' x 7'", ft3: 112, m3: 3.17 },
-            { dims: "5' x 5' x 7'", ft3: 175, m3: 4.96 },
-            { dims: "8' x 4' x 7'", ft3: 224, m3: 6.34 },
-            { dims: "8' x 8' x 7'", ft3: 448, m3: 12.69 },
-            { dims: "10' x 10' x 8'", ft3: 800, m3: 22.65 },
-            { dims: "16' x 8' x 8'", ft3: 1024, m3: 29.0 }
+            { dims: "2' x 2' x 4'", w: 2, d: 2, h: 4, ft3: 16, m3: 0.45, utilization: 0.85 },
+            { dims: "2' x 2' x 5'", w: 2, d: 2, h: 5, ft3: 20, m3: 0.57, utilization: 0.85 },
+            { dims: "2' x 4' x 5'", w: 2, d: 4, h: 5, ft3: 40, m3: 1.13, utilization: 0.80 },
+            { dims: "4' x 2' x 6'", w: 4, d: 2, h: 6, ft3: 48, m3: 1.36, utilization: 0.80 },
+            { dims: "3' x 3' x 6'", w: 3, d: 3, h: 6, ft3: 54, m3: 1.53, utilization: 0.75 },
+            { dims: "4' x 4' x 6.5'", w: 4, d: 4, h: 6.5, ft3: 104, m3: 2.94, utilization: 0.70 },
+            { dims: "4' x 4' x 7'", w: 4, d: 4, h: 7, ft3: 112, m3: 3.17, utilization: 0.70 },
+            { dims: "5' x 5' x 7'", w: 5, d: 5, h: 7, ft3: 175, m3: 4.96, utilization: 0.65 },
+            { dims: "8' x 4' x 7'", w: 8, d: 4, h: 7, ft3: 224, m3: 6.34, utilization: 0.60 },
+            { dims: "8' x 8' x 7'", w: 8, d: 8, h: 7, ft3: 448, m3: 12.69, utilization: 0.50 },
+            { dims: "10' x 10' x 8'", w: 10, d: 10, h: 8, ft3: 800, m3: 22.65, utilization: 0.45 },
+            { dims: "16' x 8' x 8'", w: 16, d: 8, h: 8, ft3: 1024, m3: 29.0, utilization: 0.45 }
         ];
 
         // House of Hydro fogger options
@@ -589,6 +689,7 @@
         let currentYield = 3;       // kg/week average
         let currentBlockSize = 5;   // lb
         let currentBE = 70;         // biological efficiency %
+        let currentCalcData = null; // Store calculation results for 3D viz
 
         // DOM elements
         const yieldSlider = document.getElementById('yield-slider');
@@ -596,6 +697,284 @@
         const beSlider = document.getElementById('be-slider');
         const beValue = document.getElementById('be-value');
         const sizeBtns = document.querySelectorAll('.size-btn');
+
+        // Three.js variables
+        let scene, camera, renderer, tentGroup;
+        let isDragging = false;
+        let previousMousePosition = { x: 0, y: 0 };
+
+        // Initialize Three.js
+        function initThreeJS() {
+            const container = document.getElementById('viz-container');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            scene = new THREE.Scene();
+
+            camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+            camera.position.set(8, 6, 10);
+            camera.lookAt(0, 0, 0);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(width, height);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(renderer.domElement);
+
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(5, 10, 7);
+            scene.add(directionalLight);
+
+            // Group to hold tent and contents
+            tentGroup = new THREE.Group();
+            scene.add(tentGroup);
+
+            // Mouse/touch controls
+            container.addEventListener('mousedown', onMouseDown);
+            container.addEventListener('mousemove', onMouseMove);
+            container.addEventListener('mouseup', onMouseUp);
+            container.addEventListener('mouseleave', onMouseUp);
+            container.addEventListener('touchstart', onTouchStart, { passive: false });
+            container.addEventListener('touchmove', onTouchMove, { passive: false });
+            container.addEventListener('touchend', onMouseUp);
+
+            // Handle resize
+            window.addEventListener('resize', onWindowResize);
+
+            animate();
+        }
+
+        function onWindowResize() {
+            const container = document.getElementById('viz-container');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+            renderer.setSize(width, height);
+        }
+
+        function onMouseDown(event) {
+            isDragging = true;
+            previousMousePosition = { x: event.clientX, y: event.clientY };
+        }
+
+        function onMouseMove(event) {
+            if (!isDragging) return;
+            const deltaX = event.clientX - previousMousePosition.x;
+            const deltaY = event.clientY - previousMousePosition.y;
+            tentGroup.rotation.y += deltaX * 0.01;
+            tentGroup.rotation.x += deltaY * 0.005;
+            tentGroup.rotation.x = Math.max(-0.5, Math.min(0.5, tentGroup.rotation.x));
+            previousMousePosition = { x: event.clientX, y: event.clientY };
+        }
+
+        function onMouseUp() {
+            isDragging = false;
+        }
+
+        function onTouchStart(event) {
+            if (event.touches.length === 1) {
+                event.preventDefault();
+                isDragging = true;
+                previousMousePosition = { x: event.touches[0].clientX, y: event.touches[0].clientY };
+            }
+        }
+
+        function onTouchMove(event) {
+            if (!isDragging || event.touches.length !== 1) return;
+            event.preventDefault();
+            const deltaX = event.touches[0].clientX - previousMousePosition.x;
+            const deltaY = event.touches[0].clientY - previousMousePosition.y;
+            tentGroup.rotation.y += deltaX * 0.01;
+            tentGroup.rotation.x += deltaY * 0.005;
+            tentGroup.rotation.x = Math.max(-0.5, Math.min(0.5, tentGroup.rotation.x));
+            previousMousePosition = { x: event.touches[0].clientX, y: event.touches[0].clientY };
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
+        }
+
+        function update3DViz(data) {
+            if (!tentGroup) return;
+
+            // Clear previous objects
+            while (tentGroup.children.length > 0) {
+                tentGroup.remove(tentGroup.children[0]);
+            }
+
+            const { tent, blocksNeeded } = data;
+            const scale = 0.8; // Scale factor for visualization
+            const w = tent.w * scale;
+            const d = tent.d * scale;
+            const h = tent.h * scale;
+
+            // Tent wireframe
+            const tentGeometry = new THREE.BoxGeometry(w, h, d);
+            const tentEdges = new THREE.EdgesGeometry(tentGeometry);
+            const tentLine = new THREE.LineSegments(
+                tentEdges,
+                new THREE.LineBasicMaterial({ color: 0xd9bf90, linewidth: 2 })
+            );
+            tentLine.position.y = h / 2;
+            tentGroup.add(tentLine);
+
+            // Semi-transparent tent walls
+            const tentWallMaterial = new THREE.MeshBasicMaterial({
+                color: 0xd9bf90,
+                transparent: true,
+                opacity: 0.1,
+                side: THREE.DoubleSide
+            });
+            const tentWalls = new THREE.Mesh(tentGeometry, tentWallMaterial);
+            tentWalls.position.y = h / 2;
+            tentGroup.add(tentWalls);
+
+            // Calculate shelving layout based on tent size and utilization
+            const shelfDepth = 1.5 * scale; // ~18" deep shelves
+            const walkwayWidth = 2.5 * scale; // ~30" walkway
+            const shelfHeight = 1.5 * scale; // Distance between shelf levels
+            const numShelfLevels = Math.floor((h - 0.5 * scale) / shelfHeight);
+
+            // Determine shelving configuration based on tent dimensions
+            let shelvingUnits = [];
+
+            if (tent.w <= 3 && tent.d <= 3) {
+                // Small tent: shelves on back wall only
+                shelvingUnits.push({
+                    x: 0,
+                    z: -d/2 + shelfDepth/2 + 0.1,
+                    width: w - 0.2,
+                    depth: shelfDepth
+                });
+            } else if (tent.w <= 5 || tent.d <= 4) {
+                // Medium tent: shelves on two or three walls
+                // Back wall
+                shelvingUnits.push({
+                    x: 0,
+                    z: -d/2 + shelfDepth/2 + 0.1,
+                    width: w - 0.3,
+                    depth: shelfDepth
+                });
+                // Side walls (partial)
+                if (tent.d > 3) {
+                    shelvingUnits.push({
+                        x: -w/2 + shelfDepth/2 + 0.1,
+                        z: 0,
+                        width: shelfDepth,
+                        depth: d - shelfDepth - 0.3 - walkwayWidth/2
+                    });
+                    shelvingUnits.push({
+                        x: w/2 - shelfDepth/2 - 0.1,
+                        z: 0,
+                        width: shelfDepth,
+                        depth: d - shelfDepth - 0.3 - walkwayWidth/2
+                    });
+                }
+            } else {
+                // Large tent: perimeter shelving with central walkway
+                // Back wall
+                shelvingUnits.push({
+                    x: 0,
+                    z: -d/2 + shelfDepth/2 + 0.1,
+                    width: w - 0.4,
+                    depth: shelfDepth
+                });
+                // Side walls
+                shelvingUnits.push({
+                    x: -w/2 + shelfDepth/2 + 0.1,
+                    z: 0,
+                    width: shelfDepth,
+                    depth: d - shelfDepth * 2 - 0.4
+                });
+                shelvingUnits.push({
+                    x: w/2 - shelfDepth/2 - 0.1,
+                    z: 0,
+                    width: shelfDepth,
+                    depth: d - shelfDepth * 2 - 0.4
+                });
+            }
+
+            // Draw shelves and place blocks
+            const shelfMaterial = new THREE.MeshBasicMaterial({
+                color: 0x888888,
+                transparent: true,
+                opacity: 0.6
+            });
+
+            const blockMaterial = new THREE.MeshLambertMaterial({ color: 0xf5f5f5 });
+            const blockSize = currentBlockSize === 5 ? 0.35 * scale : 0.45 * scale;
+
+            let blocksPlaced = 0;
+            const totalBlocks = blocksNeeded;
+
+            // Draw walkway indicator on floor
+            if (tent.w > 4 || tent.d > 4) {
+                const walkwayGeom = new THREE.PlaneGeometry(
+                    Math.min(walkwayWidth, w - shelfDepth * 2 - 0.2),
+                    d - 0.2
+                );
+                const walkwayMat = new THREE.MeshBasicMaterial({
+                    color: 0x5a7a3d,
+                    transparent: true,
+                    opacity: 0.2,
+                    side: THREE.DoubleSide
+                });
+                const walkway = new THREE.Mesh(walkwayGeom, walkwayMat);
+                walkway.rotation.x = -Math.PI / 2;
+                walkway.position.y = 0.01;
+                tentGroup.add(walkway);
+            }
+
+            shelvingUnits.forEach(unit => {
+                for (let level = 0; level < numShelfLevels && blocksPlaced < totalBlocks; level++) {
+                    const shelfY = 0.3 * scale + level * shelfHeight;
+
+                    // Draw shelf
+                    const shelfGeom = new THREE.BoxGeometry(unit.width, 0.05, unit.depth);
+                    const shelf = new THREE.Mesh(shelfGeom, shelfMaterial);
+                    shelf.position.set(unit.x, shelfY, unit.z);
+                    tentGroup.add(shelf);
+
+                    // Shelf supports (wire rack style)
+                    const supportMaterial = new THREE.LineBasicMaterial({ color: 0x666666 });
+
+                    // Place blocks on this shelf
+                    const blocksPerRow = Math.floor(unit.width / (blockSize + 0.05));
+                    const blocksPerCol = Math.floor(unit.depth / (blockSize + 0.05));
+
+                    for (let row = 0; row < blocksPerCol && blocksPlaced < totalBlocks; row++) {
+                        for (let col = 0; col < blocksPerRow && blocksPlaced < totalBlocks; col++) {
+                            const blockGeom = new THREE.BoxGeometry(blockSize, blockSize * 0.8, blockSize);
+                            const block = new THREE.Mesh(blockGeom, blockMaterial);
+
+                            const blockX = unit.x - unit.width/2 + blockSize/2 + 0.05 + col * (blockSize + 0.05);
+                            const blockZ = unit.z - unit.depth/2 + blockSize/2 + 0.05 + row * (blockSize + 0.05);
+
+                            block.position.set(blockX, shelfY + blockSize * 0.4 + 0.03, blockZ);
+                            tentGroup.add(block);
+                            blocksPlaced++;
+                        }
+                    }
+                }
+            });
+
+            // Center the visualization
+            tentGroup.position.set(0, 0, 0);
+
+            // Adjust camera based on tent size
+            const maxDim = Math.max(w, d, h);
+            camera.position.set(maxDim * 1.5, maxDim * 1.2, maxDim * 1.8);
+            camera.lookAt(0, h * 0.4, 0);
+
+            // Update stats
+            document.getElementById('viz-stats').textContent =
+                `${blocksPlaced} blocks shown · ${Math.round(tent.utilization * 100)}% usable space`;
+        }
 
         // Initialize
         function init() {
@@ -620,6 +999,7 @@
                 });
             });
 
+            initThreeJS();
             calculate();
         }
 
@@ -642,16 +1022,21 @@
             // Space per block based on size
             const spacePerBlock = currentBlockSize === 5 ? SPACE_PER_BLOCK_5LB : SPACE_PER_BLOCK_10LB;
 
-            // Chamber volume needed
-            const volumeNeeded = blocksNeeded * spacePerBlock;
-            const tent = findBestTent(volumeNeeded);
+            // Chamber volume needed (raw, before utilization adjustment)
+            const rawVolumeNeeded = blocksNeeded * spacePerBlock;
 
-            // FAE calculation
+            // Find best tent accounting for utilization
+            const tent = findBestTent(rawVolumeNeeded);
+
+            // Calculate actual usable space
+            const usableVolume = tent.ft3 * tent.utilization;
+
+            // FAE calculation (based on total tent volume, not just usable)
             const faePerHour = tent.ft3 * AIR_EXCHANGES_PER_HOUR;
             const cfm = faePerHour / 60;
 
             // Moisture loss calculation
-            const exhaustM3PerHour = (faePerHour * 0.0283168);  // ft3 to m3
+            const exhaustM3PerHour = (faePerHour * 0.0283168);  // ft³ to m³
             const moistureLossGPerHour = exhaustM3PerHour * MOISTURE_CONTENT_85RH;
 
             // Fogger sizing
@@ -675,13 +1060,13 @@
             if (cfm > 150) fanRec = "6\" inline fan";
             if (cfm > 300) fanRec = "8\" inline fan";
 
-            // Update display
-            updateDisplay({
+            const calcData = {
                 block,
                 yieldPerBlock,
                 blocksNeeded,
                 prodWeekYield,
                 tent,
+                usableVolume,
                 cfm,
                 faePerHour,
                 fogger,
@@ -691,14 +1076,18 @@
                 fanRec,
                 moistureLossGPerHour,
                 runHoursPerDay
-            });
+            };
+
+            currentCalcData = calcData;
+            updateDisplay(calcData);
+            update3DViz(calcData);
         }
 
-        function findBestTent(volumeNeeded) {
-            // Find smallest tent that fits, with 20% headroom
-            const targetVolume = volumeNeeded * 1.2;
+        function findBestTent(rawVolumeNeeded) {
+            // Find smallest tent where usable space fits our needs
             for (const tent of TENT_SIZES) {
-                if (tent.ft3 >= targetVolume) {
+                const usableVolume = tent.ft3 * tent.utilization;
+                if (usableVolume >= rawVolumeNeeded) {
                     return tent;
                 }
             }
@@ -716,7 +1105,7 @@
         }
 
         function updateDisplay(data) {
-            const { block, yieldPerBlock, blocksNeeded, prodWeekYield, tent, cfm, faePerHour, fogger, dutyCycle, discLifeMonthsMin, discLifeMonthsMax, fanRec, moistureLossGPerHour, runHoursPerDay } = data;
+            const { block, yieldPerBlock, blocksNeeded, prodWeekYield, tent, usableVolume, cfm, faePerHour, fogger, dutyCycle, discLifeMonthsMin, discLifeMonthsMax, fanRec, moistureLossGPerHour, runHoursPerDay } = data;
 
             // Target display
             document.getElementById('target-display').textContent = `${currentYield} kg/week avg`;
@@ -726,7 +1115,7 @@
             document.getElementById('blocks-value').textContent = blocksNeeded;
             document.getElementById('blocks-detail').textContent = 'all in, all out';
 
-            document.getElementById('chamber-value').textContent = `${tent.ft3} ft3`;
+            document.getElementById('chamber-value').textContent = `${tent.ft3} ft³`;
             document.getElementById('chamber-detail').textContent = tent.dims + ' tent';
 
             document.getElementById('fae-value').textContent = `${cfm.toFixed(1)} CFM`;
@@ -742,7 +1131,8 @@
             document.getElementById('spec-be').textContent = `${currentBE}%`;
             document.getElementById('spec-yield-block').textContent = `${yieldPerBlock.toFixed(2)} kg`;
             document.getElementById('spec-blocks').textContent = blocksNeeded;
-            document.getElementById('spec-chamber').textContent = `${tent.dims} (${tent.ft3} ft3 / ${tent.m3.toFixed(2)} m3)`;
+            document.getElementById('spec-chamber').textContent = `${tent.dims} (${tent.ft3} ft³ / ${tent.m3.toFixed(2)} m³)`;
+            document.getElementById('spec-usable').textContent = `${Math.round(tent.utilization * 100)}% (${usableVolume.toFixed(1)} ft³)`;
             document.getElementById('spec-fae').textContent = `5 exch/hr = ${cfm.toFixed(1)} CFM`;
             document.getElementById('spec-fogger').textContent = `${fogger.fullName} (${fogger.output} mL/hr)`;
             document.getElementById('spec-duty').textContent = `~${Math.round(dutyCycle)}% (${runHoursPerDay.toFixed(1)} hrs/day)`;
@@ -773,6 +1163,8 @@
                 tipText.textContent = "Above 100% BE is excellent! Typical for well-optimized setups with healthy spawn and good conditions.";
             } else if (dutyCycle > 60) {
                 tipText.textContent = "Your fogger is running hard. Consider stepping up to the next size for longer disc life.";
+            } else if (tent.utilization <= 0.5) {
+                tipText.textContent = `Large chambers need walkways for access. ${Math.round(tent.utilization * 100)}% of space is usable for blocks.`;
             } else if (blocks > 50) {
                 tipText.textContent = "You're at commercial scale! Consider multiple smaller chambers for redundancy and species separation.";
             } else {
