@@ -565,12 +565,23 @@
             renderer.setPixelRatio(window.devicePixelRatio);
             container.appendChild(renderer.domElement);
 
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            // Improved lighting for standard materials
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
             scene.add(ambientLight);
 
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.9);
             directionalLight.position.set(5, 10, 7);
             scene.add(directionalLight);
+
+            // Add fill light from the front
+            const fillLight = new THREE.DirectionalLight(0xfff5e6, 0.4);
+            fillLight.position.set(-3, 5, 10);
+            scene.add(fillLight);
+
+            // Subtle rim light
+            const rimLight = new THREE.DirectionalLight(0xe6f0ff, 0.3);
+            rimLight.position.set(0, 3, -8);
+            scene.add(rimLight);
 
             tentGroup = new THREE.Group();
             scene.add(tentGroup);
@@ -631,62 +642,185 @@
             return sprite;
         }
 
-        // Create oyster mushroom cluster (fan-shaped caps in overlapping cluster)
+        // Create a rounded, slightly bulging substrate block
+        function createSubstrateBlock(blockW, blockH, blockD) {
+            const segments = 8;
+            const radius = Math.min(blockW, blockH, blockD) * 0.12; // Corner radius
+            const bulge = 0.08; // How much sides bulge out
+
+            // Create custom geometry with rounded edges and slight bulge
+            const shape = new THREE.Shape();
+            const hw = blockW / 2 - radius;
+            const hh = blockH / 2 - radius;
+
+            // Rounded rectangle shape
+            shape.moveTo(-hw, -hh - radius);
+            shape.lineTo(-hw, hh);
+            shape.quadraticCurveTo(-hw, hh + radius, -hw + radius, hh + radius);
+            shape.lineTo(hw, hh + radius);
+            shape.quadraticCurveTo(hw + radius, hh + radius, hw + radius, hh);
+            shape.lineTo(hw + radius, -hh);
+            shape.quadraticCurveTo(hw + radius, -hh - radius, hw, -hh - radius);
+            shape.lineTo(-hw + radius, -hh - radius);
+            shape.quadraticCurveTo(-hw, -hh - radius, -hw, -hh);
+
+            const extrudeSettings = {
+                steps: 2,
+                depth: blockD,
+                bevelEnabled: true,
+                bevelThickness: radius,
+                bevelSize: radius,
+                bevelSegments: 3
+            };
+
+            const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+            geometry.center();
+
+            // Apply slight bulge to vertices
+            const pos = geometry.attributes.position;
+            for (let i = 0; i < pos.count; i++) {
+                const x = pos.getX(i);
+                const y = pos.getY(i);
+                const z = pos.getZ(i);
+
+                // Bulge factor based on distance from center on each axis
+                const xNorm = x / (blockW / 2);
+                const yNorm = y / (blockH / 2);
+                const zNorm = z / (blockD / 2);
+
+                // Bulge outward more in the middle
+                const xBulge = (1 - xNorm * xNorm) * bulge * blockW * Math.sign(x) * 0.5;
+                const yBulge = (1 - yNorm * yNorm) * bulge * blockH * Math.sign(y) * 0.3;
+                const zBulge = (1 - zNorm * zNorm) * bulge * blockD * Math.sign(z) * 0.5;
+
+                pos.setX(i, x + (Math.abs(x) > blockW * 0.3 ? xBulge : 0));
+                pos.setY(i, y + (Math.abs(y) > blockH * 0.3 ? yBulge : 0));
+                pos.setZ(i, z + (Math.abs(z) > blockD * 0.3 ? zBulge : 0));
+            }
+
+            geometry.computeVertexNormals();
+            return geometry;
+        }
+
+        // Create realistic oyster mushroom cluster
         function createMushroomCluster(blockW, blockH, blockD) {
             const cluster = new THREE.Group();
 
-            // Mushroom cap material - creamy tan color
-            const capMat = new THREE.MeshLambertMaterial({ color: 0xd4c4a8, side: THREE.DoubleSide });
-            const stemMat = new THREE.MeshLambertMaterial({ color: 0xf0e6d3 });
+            // Materials
+            const capTopMat = new THREE.MeshStandardMaterial({
+                color: 0xcfbfa8,
+                roughness: 0.7,
+                metalness: 0.0,
+                side: THREE.DoubleSide
+            });
+            const capBottomMat = new THREE.MeshStandardMaterial({
+                color: 0xf5efe6,
+                roughness: 0.5,
+                metalness: 0.0,
+                side: THREE.DoubleSide
+            });
+            const stemMat = new THREE.MeshStandardMaterial({
+                color: 0xf8f4ed,
+                roughness: 0.6,
+                metalness: 0.0
+            });
 
-            // Oyster caps are typically 2-5 inches, scale to feet
-            // For 5lb block (9" wide), caps ~3-4" across
-            // For 10lb block (11" wide), caps ~4-5" across
-            const capScale = Math.max(blockW, blockD) * 0.4;  // Cap size relative to block
+            // Scale mushrooms to block size (caps 3-5 inches)
+            const baseCapSize = Math.max(blockW, blockD) * 0.35;
 
-            // Create 4-7 overlapping fan-shaped caps
-            const numCaps = 4 + Math.floor(Math.random() * 4);
+            // Create 5-8 mushrooms in cluster
+            const numMushrooms = 5 + Math.floor(Math.random() * 4);
 
-            for (let i = 0; i < numCaps; i++) {
-                // Fan-shaped cap using a flattened partial sphere/cone
-                const capRadius = capScale * (0.6 + Math.random() * 0.5);
-                const capGeom = new THREE.SphereGeometry(
-                    capRadius,
-                    8, 6,
-                    0, Math.PI * 1.5,  // Partial sphere for fan shape
-                    0, Math.PI * 0.4   // Flatten it
-                );
+            for (let i = 0; i < numMushrooms; i++) {
+                const mushroom = new THREE.Group();
 
-                const cap = new THREE.Mesh(capGeom, capMat);
+                // Vary cap size
+                const capSize = baseCapSize * (0.5 + Math.random() * 0.6);
+                const capWidth = capSize * (1.0 + Math.random() * 0.3);
+                const capDepth = capSize * (0.7 + Math.random() * 0.3);
+                const capThickness = capSize * 0.08;
 
-                // Position caps in a cluster, fanning out from center
-                const angle = (i / numCaps) * Math.PI * 0.8 - Math.PI * 0.4;
-                const outward = capRadius * 0.3;
-                const verticalSpread = (i / numCaps) * capScale * 0.5;
+                // Create fan/shell shaped cap using lathe geometry with custom profile
+                const capPoints = [];
+                const capSegments = 16;
 
-                cap.position.set(
-                    Math.sin(angle) * outward,
-                    verticalSpread - capScale * 0.2,
-                    capRadius * 0.5
-                );
+                // Profile: flat with slight dome and curled edge
+                for (let j = 0; j <= capSegments; j++) {
+                    const t = j / capSegments;
+                    const r = capWidth * t;
+                    // Slight dome in middle, curl down at edges
+                    let y;
+                    if (t < 0.7) {
+                        y = capThickness * (1 - t * 0.5) * Math.sin(t * Math.PI * 0.5);
+                    } else {
+                        y = capThickness * 0.3 * (1 - t) - capThickness * (t - 0.7) * 1.5;
+                    }
+                    capPoints.push(new THREE.Vector2(r, y));
+                }
 
-                // Rotate cap to face outward and tilt down slightly
-                cap.rotation.x = -Math.PI * 0.3 - Math.random() * 0.2;
-                cap.rotation.y = angle;
-                cap.rotation.z = (Math.random() - 0.5) * 0.3;
+                // Lathe to create shell shape (partial rotation for fan effect)
+                const capGeom = new THREE.LatheGeometry(capPoints, 20, 0, Math.PI * 1.15);
 
-                cluster.add(cap);
+                // Add some waviness to the cap edge
+                const capPos = capGeom.attributes.position;
+                for (let j = 0; j < capPos.count; j++) {
+                    const x = capPos.getX(j);
+                    const y = capPos.getY(j);
+                    const z = capPos.getZ(j);
+                    const dist = Math.sqrt(x * x + z * z);
 
-                // Short stem connecting to block
-                const stemGeom = new THREE.CylinderGeometry(capRadius * 0.15, capRadius * 0.1, capRadius * 0.4, 6);
+                    // Wavy edge
+                    if (dist > capWidth * 0.6) {
+                        const wave = Math.sin(Math.atan2(z, x) * 8) * capThickness * 0.3;
+                        capPos.setY(j, y + wave * (dist / capWidth));
+                    }
+                }
+                capGeom.computeVertexNormals();
+
+                const capTop = new THREE.Mesh(capGeom, capTopMat);
+                mushroom.add(capTop);
+
+                // Gills on underside (simplified as radial lines texture via geometry)
+                const gillGeom = new THREE.LatheGeometry(capPoints.map(p => new THREE.Vector2(p.x * 0.95, p.y - capThickness * 0.3)), 20, 0, Math.PI * 1.15);
+                const gills = new THREE.Mesh(gillGeom, capBottomMat);
+                mushroom.add(gills);
+
+                // Eccentric stem (off-center, short, tapered)
+                const stemHeight = capSize * 0.4;
+                const stemRadius = capSize * 0.12;
+                const stemGeom = new THREE.CylinderGeometry(stemRadius * 0.6, stemRadius, stemHeight, 8);
+
+                // Bend the stem slightly
+                const stemPos = stemGeom.attributes.position;
+                for (let j = 0; j < stemPos.count; j++) {
+                    const y = stemPos.getY(j);
+                    const bendAmount = (y / stemHeight + 0.5) * stemRadius * 0.5;
+                    stemPos.setZ(j, stemPos.getZ(j) + bendAmount);
+                }
+                stemGeom.computeVertexNormals();
+
                 const stem = new THREE.Mesh(stemGeom, stemMat);
-                stem.position.set(
-                    cap.position.x * 0.5,
-                    cap.position.y - capRadius * 0.15,
-                    cap.position.z * 0.3
+                stem.position.set(-capWidth * 0.15, -stemHeight * 0.4, capDepth * 0.1);
+                stem.rotation.x = 0.2;
+                mushroom.add(stem);
+
+                // Position this mushroom in the cluster
+                const clusterAngle = (i / numMushrooms) * Math.PI * 0.9 - Math.PI * 0.45;
+                const clusterRadius = baseCapSize * 0.15 * (0.5 + Math.random());
+                const verticalOffset = (i / numMushrooms - 0.5) * baseCapSize * 0.4;
+
+                mushroom.position.set(
+                    Math.sin(clusterAngle) * clusterRadius,
+                    verticalOffset,
+                    Math.cos(clusterAngle) * clusterRadius * 0.3 + baseCapSize * 0.3
                 );
-                stem.rotation.x = Math.PI * 0.15;
-                cluster.add(stem);
+
+                // Rotate to fan outward
+                mushroom.rotation.y = clusterAngle + Math.PI * 0.5;
+                mushroom.rotation.x = -0.3 - Math.random() * 0.3;
+                mushroom.rotation.z = (Math.random() - 0.5) * 0.2;
+
+                cluster.add(mushroom);
             }
 
             return cluster;
@@ -736,7 +870,14 @@
 
             // Shelving and blocks
             const shelfMat = new THREE.MeshBasicMaterial({ color: 0x888888, transparent: true, opacity: 0.5 });
-            const blockMat = new THREE.MeshLambertMaterial({ color: 0xf5f5f5 });
+            const blockMat = new THREE.MeshStandardMaterial({
+                color: 0xf8f6f0,
+                roughness: 0.9,
+                metalness: 0.0
+            });
+
+            // Pre-create block geometry (reuse for all blocks)
+            const blockGeometry = createSubstrateBlock(blockW, blockH, blockD);
 
             let blocksPlaced = 0;
 
@@ -769,8 +910,7 @@
                     // Place blocks on this shelf
                     for (let row = 0; row < shelf.blocksDeep && blocksPlaced < blocksNeeded; row++) {
                         for (let col = 0; col < shelf.blocksWide && blocksPlaced < blocksNeeded; col++) {
-                            const blockGeom = new THREE.BoxGeometry(blockW, blockH, blockD);
-                            const blockMesh = new THREE.Mesh(blockGeom, blockMat);
+                            const blockMesh = new THREE.Mesh(blockGeometry, blockMat);
 
                             const bx = shelfX - shelfW/2 + (blockW + spacing)/2 + col * (blockW + spacing);
                             const bz = shelfZ - shelfD/2 + (blockD + spacing)/2 + row * (blockD + spacing);
@@ -781,7 +921,7 @@
 
                             // Add mushroom cluster growing from front of block
                             const mushrooms = createMushroomCluster(blockW, blockH, blockD);
-                            mushrooms.position.set(bx, by, bz + blockD/2);
+                            mushrooms.position.set(bx, by - blockH * 0.1, bz + blockD/2);
                             tentGroup.add(mushrooms);
 
                             blocksPlaced++;
