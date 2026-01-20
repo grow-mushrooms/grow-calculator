@@ -528,6 +528,39 @@
         }
         .sizing-calcs-content li { margin: 0.25rem 0; }
 
+        /* Tooltip styles */
+        .tooltip-label {
+            position: relative;
+            cursor: help;
+            border-bottom: 1px dotted var(--brown-medium);
+        }
+        .tooltip-label::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--brown-dark);
+            color: white;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 400;
+            line-height: 1.4;
+            width: 280px;
+            text-align: left;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s ease, visibility 0.2s ease;
+            z-index: 100;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            pointer-events: none;
+        }
+        .tooltip-label:hover::after {
+            opacity: 1;
+            visibility: visible;
+        }
+
         .copy-btn {
             display: block; width: 100%; margin-top: 1.5rem; padding: 1rem;
             background: var(--tan); color: var(--brown-dark);
@@ -656,7 +689,7 @@
     <div class="container">
         <header>
             <h1>Fruiting Chamber Calculator</h1>
-            <p class="subtitle">Pick your goal, design your fruiting chamber</p>
+            <p class="subtitle">For cultivators graduating beyond their first grow kit.</p>
         </header>
 
         <div class="community-banner">
@@ -675,7 +708,7 @@
                 </div>
 
                 <div class="input-group">
-                    <label>Block Size</label>
+                    <label>1. Block Size</label>
                     <p class="input-hint">Master's mix supplemented block weight</p>
                     <div class="size-toggle">
                         <button class="size-btn active" data-size="5">
@@ -690,7 +723,7 @@
                 </div>
 
                 <div class="input-group">
-                    <label>Species Selection</label>
+                    <label>2. Species Selection</label>
                     <p class="split-label">How do you want to separate your strains?</p>
                     <div class="split-selector">
                         <button class="split-option selected" data-split="none">No Split</button>
@@ -781,7 +814,7 @@
                 </div>
 
                 <div class="input-group">
-                    <label>Set Your Monthly Harvest Goal</label>
+                    <label>3. Set Your Monthly Harvest Goal</label>
                     <div class="slider-container">
                         <input type="range" id="yield-slider" min="4" max="92" step="4" value="40">
                         <div class="slider-value"><span id="yield-value">40</span> <span id="yield-unit">kg/month</span></div>
@@ -795,7 +828,7 @@
                 </div>
 
                 <div class="input-group">
-                    <label>Biological Efficiency</label>
+                    <label>4. <span class="tooltip-label" data-tooltip="Biological Efficiency is the ratio of fresh mushroom weight harvested divided by the dry weight of the substrate. If you don't know, leave it at 70% until you collect data from your harvests.">Estimated Biological Efficiency</span></label>
                     <div class="slider-container">
                         <input type="range" id="be-slider" min="30" max="120" step="5" value="70">
                         <div class="slider-value"><span id="be-value">70</span><span>% BE</span></div>
@@ -997,8 +1030,9 @@
         </div>
 
         <div class="promo-section">
-            <h3>Ready to Start Growing?</h3>
-            <p>Skip the setup and start harvesting fresh gourmet mushrooms at home. Our ready-to-fruit grow kits produce multiple flushes of delicious oyster, lion's mane, and more - no equipment needed.</p>
+            <h3>Support Mycology Education</h3>
+            <p>I'm trying to make interactive mycology education accessible to as many people as possible. </p>
+            <p>Reach out to</p>
             <p class="promo-note">Ships across Canada. Perfect for beginners or as gifts for the mushroom-curious.</p>
             <a href="https://heartwoodmushrooms.ca/collections/grow-kits" target="_blank" class="cta-btn promo-cta">Shop Grow Kits</a>
         </div>
