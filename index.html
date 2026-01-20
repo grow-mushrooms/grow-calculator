@@ -210,11 +210,11 @@
                     <div class="size-toggle">
                         <button class="size-btn active" data-size="5">
                             <div class="size-title">5 lb</div>
-                            <div class="size-desc">2.3 kg · 6"×5"×10"</div>
+                            <div class="size-desc">2.3 kg · 9"×7"×7"</div>
                         </button>
                         <button class="size-btn" data-size="10">
                             <div class="size-title">10 lb</div>
-                            <div class="size-desc">4.5 kg · 8"×6"×12"</div>
+                            <div class="size-desc">4.5 kg · 11"×9"×9"</div>
                         </button>
                     </div>
                 </div>
@@ -377,10 +377,9 @@
         // ============================================================
 
         // Block dimensions (width × depth × height when standing)
-        // Based on standard unicorn filter patch bags
         const BLOCK_DIMS = {
-            5: { w: 6, d: 5, h: 10, weight_kg: 2.3, weight_lb: 5, label: '5 lb (2.3 kg)' },
-            10: { w: 8, d: 6, h: 12, weight_kg: 4.5, weight_lb: 10, label: '10 lb (4.5 kg)' }
+            5: { w: 9, d: 7, h: 7, weight_kg: 2.3, weight_lb: 5, label: '5 lb (2.3 kg)' },
+            10: { w: 11, d: 9, h: 9, weight_kg: 4.5, weight_lb: 10, label: '10 lb (4.5 kg)' }
         };
 
         // Spacing between blocks for airflow (inches)
@@ -632,6 +631,67 @@
             return sprite;
         }
 
+        // Create oyster mushroom cluster (fan-shaped caps in overlapping cluster)
+        function createMushroomCluster(blockW, blockH, blockD) {
+            const cluster = new THREE.Group();
+
+            // Mushroom cap material - creamy tan color
+            const capMat = new THREE.MeshLambertMaterial({ color: 0xd4c4a8, side: THREE.DoubleSide });
+            const stemMat = new THREE.MeshLambertMaterial({ color: 0xf0e6d3 });
+
+            // Oyster caps are typically 2-5 inches, scale to feet
+            // For 5lb block (9" wide), caps ~3-4" across
+            // For 10lb block (11" wide), caps ~4-5" across
+            const capScale = Math.max(blockW, blockD) * 0.4;  // Cap size relative to block
+
+            // Create 4-7 overlapping fan-shaped caps
+            const numCaps = 4 + Math.floor(Math.random() * 4);
+
+            for (let i = 0; i < numCaps; i++) {
+                // Fan-shaped cap using a flattened partial sphere/cone
+                const capRadius = capScale * (0.6 + Math.random() * 0.5);
+                const capGeom = new THREE.SphereGeometry(
+                    capRadius,
+                    8, 6,
+                    0, Math.PI * 1.5,  // Partial sphere for fan shape
+                    0, Math.PI * 0.4   // Flatten it
+                );
+
+                const cap = new THREE.Mesh(capGeom, capMat);
+
+                // Position caps in a cluster, fanning out from center
+                const angle = (i / numCaps) * Math.PI * 0.8 - Math.PI * 0.4;
+                const outward = capRadius * 0.3;
+                const verticalSpread = (i / numCaps) * capScale * 0.5;
+
+                cap.position.set(
+                    Math.sin(angle) * outward,
+                    verticalSpread - capScale * 0.2,
+                    capRadius * 0.5
+                );
+
+                // Rotate cap to face outward and tilt down slightly
+                cap.rotation.x = -Math.PI * 0.3 - Math.random() * 0.2;
+                cap.rotation.y = angle;
+                cap.rotation.z = (Math.random() - 0.5) * 0.3;
+
+                cluster.add(cap);
+
+                // Short stem connecting to block
+                const stemGeom = new THREE.CylinderGeometry(capRadius * 0.15, capRadius * 0.1, capRadius * 0.4, 6);
+                const stem = new THREE.Mesh(stemGeom, stemMat);
+                stem.position.set(
+                    cap.position.x * 0.5,
+                    cap.position.y - capRadius * 0.15,
+                    cap.position.z * 0.3
+                );
+                stem.rotation.x = Math.PI * 0.15;
+                cluster.add(stem);
+            }
+
+            return cluster;
+        }
+
         function update3DViz(data) {
             if (!tentGroup) return;
 
@@ -718,6 +778,12 @@
 
                             blockMesh.position.set(bx, by, bz);
                             tentGroup.add(blockMesh);
+
+                            // Add mushroom cluster growing from front of block
+                            const mushrooms = createMushroomCluster(blockW, blockH, blockD);
+                            mushrooms.position.set(bx, by, bz + blockD/2);
+                            tentGroup.add(mushrooms);
+
                             blocksPlaced++;
                         }
                     }
