@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fruiting Chamber Calculator | Heartwood Mushrooms</title>
+    <style>
+        :root {
+            --brown-dark: #3b281e;
+            --brown-medium: #5a4235;
+            --tan: #d9bf90;
+            --cream: #e7ded1;
+            --cream-light: #f5f1eb;
+            --forest-green: #455a30;
+            --forest-green-light: #5a7a3d;
+            --blue-accent: #545da3;
+            --white: #ffffff;
+            --shadow: rgba(59, 40, 30, 0.1);
+            --shadow-strong: rgba(59, 40, 30, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, var(--cream-light) 0%, var(--cream) 100%);
+            min-height: 100vh;
+            color: var(--brown-dark);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--brown-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: var(--brown-medium);
+            font-size: 1.1rem;
+        }
+
+        .calculator-card {
+            background: var(--white);
+            border-radius: 16px;
+            box-shadow: 0 4px 24px var(--shadow), 0 1px 4px var(--shadow);
+            overflow: hidden;
+        }
+
+        .input-section {
+            padding: 2rem;
+            background: var(--white);
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .input-group:last-child {
+            margin-bottom: 0;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--brown-dark);
+        }
+
+        .input-hint {
+            font-size: 0.85rem;
+            color: var(--brown-medium);
+            margin-bottom: 0.5rem;
+        }
+
+        .slider-container {
+            position: relative;
+            padding: 0.5rem 0;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: linear-gradient(to right, var(--tan) 0%, var(--forest-green) 100%);
+            outline: none;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--brown-dark);
+            cursor: pointer;
+            border: 3px solid var(--white);
+            box-shadow: 0 2px 8px var(--shadow-strong);
+            transition: transform 0.15s ease;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--brown-dark);
+            cursor: pointer;
+            border: 3px solid var(--white);
+            box-shadow: 0 2px 8px var(--shadow-strong);
+        }
+
+        .slider-value {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--forest-green);
+            margin: 0.5rem 0;
+        }
+
+        .slider-value span {
+            font-size: 1rem;
+            color: var(--brown-medium);
+            font-weight: 400;
+        }
+
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: var(--brown-medium);
+            margin-top: 0.25rem;
+        }
+
+        .size-toggle {
+            display: flex;
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .size-btn {
+            flex: 1;
+            padding: 1rem;
+            border: 2px solid var(--tan);
+            border-radius: 12px;
+            background: var(--white);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .size-btn:hover {
+            border-color: var(--forest-green);
+            background: var(--cream-light);
+        }
+
+        .size-btn.active {
+            border-color: var(--forest-green);
+            background: linear-gradient(135deg, rgba(69, 90, 48, 0.08) 0%, rgba(69, 90, 48, 0.04) 100%);
+        }
+
+        .size-btn .size-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--brown-dark);
+        }
+
+        .size-btn .size-desc {
+            font-size: 0.85rem;
+            color: var(--brown-medium);
+            margin-top: 0.25rem;
+        }
+
+        .size-btn.active .size-title {
+            color: var(--forest-green);
+        }
+
+        .results-section {
+            background: linear-gradient(135deg, var(--brown-dark) 0%, var(--brown-medium) 100%);
+            padding: 2rem;
+            color: var(--white);
+        }
+
+        .results-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .results-header h2 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--tan);
+            margin-bottom: 0.25rem;
+        }
+
+        .results-header .target {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .results-header .cycle-info {
+            font-size: 0.95rem;
+            color: var(--tan);
+            margin-top: 0.5rem;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .result-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.25rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .result-card .label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--tan);
+            margin-bottom: 0.5rem;
+        }
+
+        .result-card .value {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .result-card .detail {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 0.25rem;
+        }
+
+        .spec-sheet {
+            margin-top: 1.5rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .spec-sheet h3 {
+            font-size: 1rem;
+            color: var(--tan);
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .spec-list {
+            font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+            font-size: 0.9rem;
+            line-height: 1.8;
+        }
+
+        .spec-list .spec-row {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0.5rem 0;
+        }
+
+        .spec-list .spec-row:last-child {
+            border-bottom: none;
+        }
+
+        .spec-list .spec-label {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .spec-list .spec-value {
+            font-weight: 600;
+            text-align: right;
+        }
+
+        .tip-box {
+            margin-top: 1.5rem;
+            background: rgba(69, 90, 48, 0.3);
+            border-left: 4px solid var(--forest-green-light);
+            border-radius: 0 8px 8px 0;
+            padding: 1rem 1.25rem;
+        }
+
+        .tip-box .tip-title {
+            font-weight: 600;
+            color: var(--forest-green-light);
+            margin-bottom: 0.25rem;
+            font-size: 0.9rem;
+        }
+
+        .tip-box p {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .copy-btn {
+            display: block;
+            width: 100%;
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: var(--tan);
+            color: var(--brown-dark);
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .copy-btn:hover {
+            background: var(--cream);
+            transform: translateY(-1px);
+        }
+
+        .copy-btn:active {
+            transform: translateY(0);
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem 1rem;
+            color: var(--brown-medium);
+            font-size: 0.9rem;
+        }
+
+        footer a {
+            color: var(--forest-green);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .input-section, .results-section {
+                padding: 1.5rem;
+            }
+
+            .slider-value {
+                font-size: 2rem;
+            }
+
+            .size-toggle {
+                flex-direction: column;
+            }
+
+            .results-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .result-card .value {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Fruiting Chamber Calculator</h1>
+            <p class="subtitle">Size your batch setup from target yield</p>
+        </header>
+
+        <div class="calculator-card">
+            <div class="input-section">
+                <div class="input-group">
+                    <label>Average Weekly Harvest</label>
+                    <p class="input-hint">Target fresh mushroom yield (averaged across 4-week cycle)</p>
+                    <div class="slider-container">
+                        <input type="range" id="yield-slider" min="0.5" max="50" step="0.5" value="3">
+                        <div class="slider-value"><span id="yield-value">3</span> <span>kg/week avg</span></div>
+                        <div class="slider-labels">
+                            <span>0.5 kg</span>
+                            <span>50 kg</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Block Size</label>
+                    <p class="input-hint">Master's mix supplemented block weight</p>
+                    <div class="size-toggle">
+                        <button class="size-btn active" data-size="5">
+                            <div class="size-title">5 lb</div>
+                            <div class="size-desc">2.3 kg block</div>
+                        </button>
+                        <button class="size-btn" data-size="10">
+                            <div class="size-title">10 lb</div>
+                            <div class="size-desc">4.5 kg block</div>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Biological Efficiency</label>
+                    <p class="input-hint">BE% = Fresh Yield / (Block Weight x 40% dry fraction)</p>
+                    <div class="slider-container">
+                        <input type="range" id="be-slider" min="0" max="150" step="5" value="70">
+                        <div class="slider-value"><span id="be-value">70</span><span>% BE</span></div>
+                        <div class="slider-labels">
+                            <span>0%</span>
+                            <span>75%</span>
+                            <span>150%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="results-section">
+                <div class="results-header">
+                    <h2>BATCH SETUP</h2>
+                    <div class="target" id="target-display">3 kg/week avg</div>
+                    <div class="cycle-info" id="cycle-info">~4 kg weeks 1-3, week 4 cleaning</div>
+                </div>
+
+                <div class="results-grid">
+                    <div class="result-card">
+                        <div class="label">Blocks per Batch</div>
+                        <div class="value" id="blocks-value">5</div>
+                        <div class="detail" id="blocks-detail">all in, all out</div>
+                    </div>
+                    <div class="result-card">
+                        <div class="label">Chamber Size</div>
+                        <div class="value" id="chamber-value">16 ft3</div>
+                        <div class="detail" id="chamber-detail">2' x 2' x 4' tent</div>
+                    </div>
+                    <div class="result-card">
+                        <div class="label">FAE Required</div>
+                        <div class="value" id="fae-value">1.3 CFM</div>
+                        <div class="detail" id="fae-detail">80mm fan on low</div>
+                    </div>
+                    <div class="result-card">
+                        <div class="label">Fogger Size</div>
+                        <div class="value" id="fogger-value">1-disc</div>
+                        <div class="detail" id="fogger-detail">~22% duty cycle</div>
+                    </div>
+                </div>
+
+                <div class="spec-sheet">
+                    <h3>Full Spec Sheet</h3>
+                    <div class="spec-list">
+                        <div class="spec-row">
+                            <span class="spec-label">Target (avg)</span>
+                            <span class="spec-value" id="spec-target">3 kg/week</span>
+                        </div>
+                        <div class="spec-row">
+                            <span class="spec-label">Production weeks</span>
+                            <span class="spec-value" id="spec-prod-weeks">~4 kg/wk for 3 weeks</span>
+                        </div>
+                        <div class="spec-row">
+                            <span class="spec-label">Block size</span>
+                            <span class="spec-value" id="spec-block-size">5 lb (2.3 kg)</span>
+                        </div>
+                        <div class="spec-row">
+                            <span class="spec-label">Biological efficiency</span>
+                            <span class="spec-value" id="spec-be">70%</span>
+                        </div>
+                        <div class="spec-row">
+                            <span class="spec-label">Yield per block</span>
+                            <span class="spec-value" id="spec-yield-block">0.64 kg</span>
+                        </div>
+                        <div class="spec-row">
+                            <span class="spec-label">Blocks per batch</span>
+                            <span class="spec-value" id="spec-blocks">5</span>
+                        </div>
+                        <div class="spec-row">
+                            <span class="spec-label">Chamber</span>
+                            <span class="spec-value" id="spec-chamber">2' x 2' x 4' (16 ft3)</span>
+                        </div>
+                        <div class="spec-row">
+                            <span class="spec-label">FAE</span>
+                            <span class="spec-value" id="spec-fae">5 exch/hr = 1.3 CFM</span>
+                        </div>
+                        <div class="spec-row">
+                            <span class="spec-label">Humidity</span>
+                            <span class="spec-value">85% RH (Inkbird IHC-200)</span>
+                        </div>
+                        <div class="spec-row">
+                            <span class="spec-label">Fogger</span>
+                            <span class="spec-value" id="spec-fogger">House of Hydro 1-disc (500 mL/hr)</span>
+                        </div>
+                        <div class="spec-row">
+                            <span class="spec-label">Duty Cycle</span>
+                            <span class="spec-value" id="spec-duty">~22%</span>
+                        </div>
+                        <div class="spec-row">
+                            <span class="spec-label">Disc Life</span>
+                            <span class="spec-value" id="spec-life">15-24 months</span>
+                        </div>
+                        <div class="spec-row">
+                            <span class="spec-label">Temperature</span>
+                            <span class="spec-value">18-21C</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tip-box" id="tip-box">
+                    <div class="tip-title">Batch Cycle</div>
+                    <p id="tip-text">3 weeks production, 1 week cleaning/restart. Full clean between batches reduces contamination risk.</p>
+                </div>
+
+                <button class="copy-btn" onclick="copySpecs()">Copy Spec Sheet</button>
+            </div>
+        </div>
+
+        <footer>
+            Calculator by <a href="https://heartwoodmushrooms.ca" target="_blank">Heartwood Mushrooms</a>
+        </footer>
+    </div>
+
+    <script>
+        // Block sizes
+        const BLOCK_SIZES = {
+            5: { weight_kg: 2.3, weight_lb: 5, label: '5 lb (2.3 kg)' },
+            10: { weight_kg: 4.5, weight_lb: 10, label: '10 lb (4.5 kg)' }
+        };
+
+        // Constants
+        const DRY_MASS_RATIO = 0.4;  // 40% dry fraction
+        const PRODUCTION_WEEKS = 3;  // weeks of production per cycle
+        const CYCLE_WEEKS = 4;       // total weeks including cleaning
+        const SPACE_PER_BLOCK_5LB = 2.5;  // ft3
+        const SPACE_PER_BLOCK_10LB = 4.0; // ft3 (larger blocks need more room)
+        const AIR_EXCHANGES_PER_HOUR = 5;
+        const MOISTURE_CONTENT_85RH = 14.5;  // g/m3 at 20C, 85% RH
+        const DISC_LIFE_HOURS_MIN = 2500;
+        const DISC_LIFE_HOURS_MAX = 3500;
+
+        // Tent sizes (common grow tents)
+        const TENT_SIZES = [
+            { dims: "2' x 2' x 4'", ft3: 16, m3: 0.45 },
+            { dims: "2' x 2' x 5'", ft3: 20, m3: 0.57 },
+            { dims: "2' x 4' x 5'", ft3: 40, m3: 1.13 },
+            { dims: "3' x 3' x 6'", ft3: 54, m3: 1.53 },
+            { dims: "4' x 2' x 6'", ft3: 48, m3: 1.36 },
+            { dims: "4' x 4' x 6.5'", ft3: 104, m3: 2.94 },
+            { dims: "4' x 4' x 7'", ft3: 112, m3: 3.17 },
+            { dims: "5' x 5' x 7'", ft3: 175, m3: 4.96 },
+            { dims: "8' x 4' x 7'", ft3: 224, m3: 6.34 },
+            { dims: "8' x 8' x 7'", ft3: 448, m3: 12.69 },
+            { dims: "10' x 10' x 8'", ft3: 800, m3: 22.65 },
+            { dims: "16' x 8' x 8'", ft3: 1024, m3: 29.0 }
+        ];
+
+        // House of Hydro fogger options
+        const FOGGERS = [
+            { name: "1-disc", fullName: "House of Hydro 1-disc", output: 500, price: 30 },
+            { name: "3-disc", fullName: "House of Hydro 3-disc", output: 1500, price: 100 },
+            { name: "5-disc", fullName: "House of Hydro 5-disc", output: 1900, price: 150 },
+            { name: "9-disc", fullName: "House of Hydro 9-disc", output: 2500, price: 200 },
+            { name: "12-disc", fullName: "House of Hydro 12-disc", output: 6000, price: 250 }
+        ];
+
+        // State
+        let currentYield = 3;       // kg/week average
+        let currentBlockSize = 5;   // lb
+        let currentBE = 70;         // biological efficiency %
+
+        // DOM elements
+        const yieldSlider = document.getElementById('yield-slider');
+        const yieldValue = document.getElementById('yield-value');
+        const beSlider = document.getElementById('be-slider');
+        const beValue = document.getElementById('be-value');
+        const sizeBtns = document.querySelectorAll('.size-btn');
+
+        // Initialize
+        function init() {
+            yieldSlider.addEventListener('input', (e) => {
+                currentYield = parseFloat(e.target.value);
+                yieldValue.textContent = currentYield;
+                calculate();
+            });
+
+            beSlider.addEventListener('input', (e) => {
+                currentBE = parseInt(e.target.value);
+                beValue.textContent = currentBE;
+                calculate();
+            });
+
+            sizeBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    sizeBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentBlockSize = parseInt(btn.dataset.size);
+                    calculate();
+                });
+            });
+
+            calculate();
+        }
+
+        function calculate() {
+            const block = BLOCK_SIZES[currentBlockSize];
+            const beDecimal = currentBE / 100;
+
+            // Yield per block: block weight * dry fraction * BE
+            const yieldPerBlock = block.weight_kg * DRY_MASS_RATIO * beDecimal;
+
+            // Total cycle yield needed (4 weeks avg = currentYield * 4)
+            const totalCycleYield = currentYield * CYCLE_WEEKS;
+
+            // Blocks needed for the batch
+            const blocksNeeded = yieldPerBlock > 0 ? Math.ceil(totalCycleYield / yieldPerBlock) : 0;
+
+            // Production week yield (all yield happens in 3 weeks)
+            const prodWeekYield = blocksNeeded > 0 ? (blocksNeeded * yieldPerBlock) / PRODUCTION_WEEKS : 0;
+
+            // Space per block based on size
+            const spacePerBlock = currentBlockSize === 5 ? SPACE_PER_BLOCK_5LB : SPACE_PER_BLOCK_10LB;
+
+            // Chamber volume needed
+            const volumeNeeded = blocksNeeded * spacePerBlock;
+            const tent = findBestTent(volumeNeeded);
+
+            // FAE calculation
+            const faePerHour = tent.ft3 * AIR_EXCHANGES_PER_HOUR;
+            const cfm = faePerHour / 60;
+
+            // Moisture loss calculation
+            const exhaustM3PerHour = (faePerHour * 0.0283168);  // ft3 to m3
+            const moistureLossGPerHour = exhaustM3PerHour * MOISTURE_CONTENT_85RH;
+
+            // Fogger sizing
+            const targetDuty = 0.33;
+            const idealOutput = moistureLossGPerHour / targetDuty;
+            const fogger = findBestFogger(idealOutput, moistureLossGPerHour);
+
+            // Duty cycle with chosen fogger
+            const dutyCycle = Math.min(100, (moistureLossGPerHour / fogger.output) * 100);
+            const runHoursPerDay = (dutyCycle / 100) * 24;
+
+            // Disc life calculation
+            const discLifeMonthsMin = Math.round((DISC_LIFE_HOURS_MIN / runHoursPerDay) / 30);
+            const discLifeMonthsMax = Math.round((DISC_LIFE_HOURS_MAX / runHoursPerDay) / 30);
+
+            // Fan recommendation
+            let fanRec = "80mm PC fan on low";
+            if (cfm > 5) fanRec = "80mm PC fan on medium";
+            if (cfm > 15) fanRec = "120mm fan or inline fan";
+            if (cfm > 50) fanRec = "4\" inline fan";
+            if (cfm > 150) fanRec = "6\" inline fan";
+            if (cfm > 300) fanRec = "8\" inline fan";
+
+            // Update display
+            updateDisplay({
+                block,
+                yieldPerBlock,
+                blocksNeeded,
+                prodWeekYield,
+                tent,
+                cfm,
+                faePerHour,
+                fogger,
+                dutyCycle,
+                discLifeMonthsMin,
+                discLifeMonthsMax,
+                fanRec,
+                moistureLossGPerHour,
+                runHoursPerDay
+            });
+        }
+
+        function findBestTent(volumeNeeded) {
+            // Find smallest tent that fits, with 20% headroom
+            const targetVolume = volumeNeeded * 1.2;
+            for (const tent of TENT_SIZES) {
+                if (tent.ft3 >= targetVolume) {
+                    return tent;
+                }
+            }
+            return TENT_SIZES[TENT_SIZES.length - 1];
+        }
+
+        function findBestFogger(idealOutput, moistureLoss) {
+            for (const fogger of FOGGERS) {
+                const duty = (moistureLoss / fogger.output) * 100;
+                if (duty <= 50) {
+                    return fogger;
+                }
+            }
+            return FOGGERS[FOGGERS.length - 1];
+        }
+
+        function updateDisplay(data) {
+            const { block, yieldPerBlock, blocksNeeded, prodWeekYield, tent, cfm, faePerHour, fogger, dutyCycle, discLifeMonthsMin, discLifeMonthsMax, fanRec, moistureLossGPerHour, runHoursPerDay } = data;
+
+            // Target display
+            document.getElementById('target-display').textContent = `${currentYield} kg/week avg`;
+            document.getElementById('cycle-info').textContent = `~${prodWeekYield.toFixed(1)} kg weeks 1-3, week 4 cleaning`;
+
+            // Cards
+            document.getElementById('blocks-value').textContent = blocksNeeded;
+            document.getElementById('blocks-detail').textContent = 'all in, all out';
+
+            document.getElementById('chamber-value').textContent = `${tent.ft3} ft3`;
+            document.getElementById('chamber-detail').textContent = tent.dims + ' tent';
+
+            document.getElementById('fae-value').textContent = `${cfm.toFixed(1)} CFM`;
+            document.getElementById('fae-detail').textContent = fanRec;
+
+            document.getElementById('fogger-value').textContent = fogger.name;
+            document.getElementById('fogger-detail').textContent = `~${Math.round(dutyCycle)}% duty cycle`;
+
+            // Spec sheet
+            document.getElementById('spec-target').textContent = `${currentYield} kg/week`;
+            document.getElementById('spec-prod-weeks').textContent = `~${prodWeekYield.toFixed(1)} kg/wk for 3 weeks`;
+            document.getElementById('spec-block-size').textContent = block.label;
+            document.getElementById('spec-be').textContent = `${currentBE}%`;
+            document.getElementById('spec-yield-block').textContent = `${yieldPerBlock.toFixed(2)} kg`;
+            document.getElementById('spec-blocks').textContent = blocksNeeded;
+            document.getElementById('spec-chamber').textContent = `${tent.dims} (${tent.ft3} ft3 / ${tent.m3.toFixed(2)} m3)`;
+            document.getElementById('spec-fae').textContent = `5 exch/hr = ${cfm.toFixed(1)} CFM`;
+            document.getElementById('spec-fogger').textContent = `${fogger.fullName} (${fogger.output} mL/hr)`;
+            document.getElementById('spec-duty').textContent = `~${Math.round(dutyCycle)}% (${runHoursPerDay.toFixed(1)} hrs/day)`;
+
+            // Disc life formatting
+            let discLifeText;
+            if (discLifeMonthsMin >= 24) {
+                discLifeText = `${Math.round(discLifeMonthsMin/12)}-${Math.round(discLifeMonthsMax/12)} years`;
+            } else {
+                discLifeText = `${discLifeMonthsMin}-${discLifeMonthsMax} months`;
+            }
+            document.getElementById('spec-life').textContent = discLifeText;
+
+            // Tips
+            updateTip(blocksNeeded, tent, dutyCycle, yieldPerBlock);
+        }
+
+        function updateTip(blocks, tent, dutyCycle, yieldPerBlock) {
+            const tipText = document.getElementById('tip-text');
+
+            if (currentBE === 0) {
+                tipText.textContent = "Set biological efficiency above 0% to calculate block requirements.";
+            } else if (yieldPerBlock < 0.1) {
+                tipText.textContent = "Very low BE results in minimal yield per block. Check your cultivation parameters.";
+            } else if (currentBE < 50) {
+                tipText.textContent = "Below 50% BE is low for oysters on master's mix. Check spawn quality, substrate prep, and fruiting conditions.";
+            } else if (currentBE > 100) {
+                tipText.textContent = "Above 100% BE is excellent! Typical for well-optimized setups with healthy spawn and good conditions.";
+            } else if (dutyCycle > 60) {
+                tipText.textContent = "Your fogger is running hard. Consider stepping up to the next size for longer disc life.";
+            } else if (blocks > 50) {
+                tipText.textContent = "You're at commercial scale! Consider multiple smaller chambers for redundancy and species separation.";
+            } else {
+                tipText.textContent = "3 weeks production, 1 week cleaning/restart. Full clean between batches reduces contamination risk.";
+            }
+        }
+
+        function copySpecs() {
+            const specs = [];
+            document.querySelectorAll('.spec-row').forEach(row => {
+                const label = row.querySelector('.spec-label').textContent;
+                const value = row.querySelector('.spec-value').textContent;
+                specs.push(`${label}: ${value}`);
+            });
+
+            const text = `FRUITING CHAMBER SPECS (BATCH MODE)\n${'='.repeat(40)}\n${specs.join('\n')}\n\nCalculated at heartwoodmushrooms.ca`;
+
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = document.querySelector('.copy-btn');
+                btn.textContent = 'Copied!';
+                setTimeout(() => {
+                    btn.textContent = 'Copy Spec Sheet';
+                }, 2000);
+            });
+        }
+
+        // Start
+        init();
+    </script>
+</body>
+</html>
