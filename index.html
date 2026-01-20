@@ -327,8 +327,12 @@
                             <span class="spec-value" id="spec-shelving">1× rack, 4 levels</span>
                         </div>
                         <div class="spec-row">
-                            <span class="spec-label">FAE</span>
-                            <span class="spec-value" id="spec-fae">5 exch/hr = 1.3 CFM</span>
+                            <span class="spec-label">FAE target</span>
+                            <span class="spec-value" id="spec-fae">6 exch/hr → 45 CFM</span>
+                        </div>
+                        <div class="spec-row">
+                            <span class="spec-label">Fan (w/ ducting)</span>
+                            <span class="spec-value" id="spec-fan">6" inline (~400 CFM rated)</span>
                         </div>
                         <div class="spec-row">
                             <span class="spec-label">Humidity</span>
@@ -417,10 +421,13 @@
         const DRY_MASS_RATIO = 0.4;
         const PRODUCTION_WEEKS = 3;
         const CYCLE_WEEKS = 4;
-        const AIR_EXCHANGES_PER_HOUR = 5;
         const MOISTURE_CONTENT_85RH = 14.5;  // g/m³ at 20°C, 85% RH
         const DISC_LIFE_HOURS_MIN = 2500;
         const DISC_LIFE_HOURS_MAX = 3500;
+
+        // FAE increases with tent size (more blocks = more CO2, longer air paths)
+        // Static pressure from ducting reduces effective CFM by 50-70%
+        const DUCT_LOSS_FACTOR = 2.5;  // Fan needs 2.5× rated CFM to deliver target
 
         const FOGGERS = [
             { name: "1-disc", fullName: "House of Hydro 1-disc", output: 500 },
@@ -749,14 +756,24 @@
             // Find best tent based on actual capacity
             const { tent, config } = findBestTent(blocksNeeded, currentBlockSize);
 
-            // FAE calculation
+            // FAE calculation - exchange rate scales with tent size
+            // Small: 4-6/hr, Medium: 6-8/hr, Large: 8-12/hr
             const ft3 = tent.w * tent.d * tent.h;
             const m3 = ft3 * 0.0283168;
-            const faePerHour = ft3 * AIR_EXCHANGES_PER_HOUR;
-            const cfm = faePerHour / 60;
 
-            // Moisture/fogger
-            const exhaustM3PerHour = faePerHour * 0.0283168;
+            // Scale air exchanges: more volume = higher rate needed for CO2 removal
+            let exchangesPerHour;
+            if (ft3 <= 40) exchangesPerHour = 5;
+            else if (ft3 <= 120) exchangesPerHour = 6;
+            else if (ft3 <= 200) exchangesPerHour = 8;
+            else if (ft3 <= 400) exchangesPerHour = 10;
+            else exchangesPerHour = 12;
+
+            const targetCfm = (ft3 * exchangesPerHour) / 60;  // Actual airflow needed
+            const fanRatedCfm = targetCfm * DUCT_LOSS_FACTOR;  // Fan rating to achieve target with ducting
+
+            // Moisture/fogger (based on actual airflow, not fan rating)
+            const exhaustM3PerHour = (targetCfm * 60) * 0.0283168;
             const moistureLossGPerHour = exhaustM3PerHour * MOISTURE_CONTENT_85RH;
             const fogger = FOGGERS.find(f => (moistureLossGPerHour / f.output) * 100 <= 50) || FOGGERS[FOGGERS.length - 1];
             const dutyCycle = Math.min(100, (moistureLossGPerHour / fogger.output) * 100);
@@ -765,16 +782,28 @@
             const discLifeMonthsMin = Math.round((DISC_LIFE_HOURS_MIN / runHoursPerDay) / 30);
             const discLifeMonthsMax = Math.round((DISC_LIFE_HOURS_MAX / runHoursPerDay) / 30);
 
-            let fanRec = "80mm PC fan on low";
-            if (cfm > 5) fanRec = "80mm PC fan on medium";
-            if (cfm > 15) fanRec = "120mm fan or inline fan";
-            if (cfm > 50) fanRec = '4" inline fan';
-            if (cfm > 150) fanRec = '6" inline fan';
+            // Fan recommendation based on rated CFM needed (accounting for duct losses)
+            // 80mm PC: ~25 CFM rated, 120mm: ~50 CFM, 4" inline: ~200 CFM, 6" inline: ~400 CFM, 8" inline: ~700 CFM
+            let fanRec, fanSize;
+            if (fanRatedCfm <= 25) {
+                fanRec = "80mm PC fan"; fanSize = "80mm";
+            } else if (fanRatedCfm <= 50) {
+                fanRec = "120mm PC fan"; fanSize = "120mm";
+            } else if (fanRatedCfm <= 120) {
+                fanRec = '4" inline fan'; fanSize = '4"';
+            } else if (fanRatedCfm <= 250) {
+                fanRec = '4" inline on high or 6" inline'; fanSize = '4-6"';
+            } else if (fanRatedCfm <= 450) {
+                fanRec = '6" inline fan'; fanSize = '6"';
+            } else {
+                fanRec = '8" inline fan'; fanSize = '8"';
+            }
 
             const calcData = {
                 block, yieldPerBlock, blocksNeeded, prodWeekYield,
-                tent, config, ft3, m3, cfm, faePerHour,
-                fogger, dutyCycle, discLifeMonthsMin, discLifeMonthsMax, fanRec,
+                tent, config, ft3, m3,
+                exchangesPerHour, targetCfm, fanRatedCfm, fanRec, fanSize,
+                fogger, dutyCycle, discLifeMonthsMin, discLifeMonthsMax,
                 runHoursPerDay
             };
 
@@ -784,7 +813,9 @@
         }
 
         function updateDisplay(data) {
-            const { block, yieldPerBlock, blocksNeeded, prodWeekYield, tent, config, ft3, m3, cfm, fogger, dutyCycle, discLifeMonthsMin, discLifeMonthsMax, fanRec, runHoursPerDay } = data;
+            const { block, yieldPerBlock, blocksNeeded, prodWeekYield, tent, config, ft3, m3,
+                    exchangesPerHour, targetCfm, fanRatedCfm, fanRec, fanSize,
+                    fogger, dutyCycle, discLifeMonthsMin, discLifeMonthsMax, runHoursPerDay } = data;
 
             document.getElementById('target-display').textContent = `${currentYield} kg/week avg`;
             document.getElementById('cycle-info').textContent = `~${prodWeekYield.toFixed(1)} kg weeks 1-3, week 4 cleaning`;
@@ -795,8 +826,8 @@
             document.getElementById('chamber-value').textContent = `${ft3} ft³`;
             document.getElementById('chamber-detail').textContent = tent.dims;
 
-            document.getElementById('fae-value').textContent = `${cfm.toFixed(1)} CFM`;
-            document.getElementById('fae-detail').textContent = fanRec;
+            document.getElementById('fae-value').textContent = fanSize;
+            document.getElementById('fae-detail').textContent = `${Math.round(fanRatedCfm)} CFM rated`;
 
             document.getElementById('fogger-value').textContent = fogger.name;
             document.getElementById('fogger-detail').textContent = `~${Math.round(dutyCycle)}% duty cycle`;
@@ -815,7 +846,8 @@
             const numRacks = config.shelves.length;
             document.getElementById('spec-shelving').textContent = `${numRacks}× rack${numRacks > 1 ? 's' : ''}, ${config.numLevels} levels`;
 
-            document.getElementById('spec-fae').textContent = `5 exch/hr = ${cfm.toFixed(1)} CFM`;
+            document.getElementById('spec-fae').textContent = `${exchangesPerHour} exch/hr → ${Math.round(targetCfm)} CFM target`;
+            document.getElementById('spec-fan').textContent = `${fanRec} (~${Math.round(fanRatedCfm)} CFM rated)`;
             document.getElementById('spec-fogger').textContent = `${fogger.fullName}`;
             document.getElementById('spec-duty').textContent = `~${Math.round(dutyCycle)}% (${runHoursPerDay.toFixed(1)} hrs/day)`;
 
