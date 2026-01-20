@@ -87,14 +87,25 @@
         .slider-value { text-align: center; font-size: 2.5rem; font-weight: 700; color: var(--forest-green); margin: 0.5rem 0; }
         .slider-value span { font-size: 1rem; color: var(--brown-medium); font-weight: 400; }
 
-        .slider-labels { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--brown-medium); margin-top: 0.25rem; }
+        /* Unit toggle at top */
+        .unit-toggle-container { display: flex; justify-content: flex-end; margin-bottom: 1rem; }
+        .unit-toggle {
+            display: flex; gap: 0; border: 2px solid var(--tan); border-radius: 8px; overflow: hidden;
+        }
+        .unit-btn {
+            padding: 0.4rem 1rem; border: none; background: var(--white);
+            font-size: 0.85rem; font-weight: 600; color: var(--brown-medium);
+            cursor: pointer; transition: all 0.2s ease;
+        }
+        .unit-btn:hover { background: var(--cream-light); }
+        .unit-btn.active { background: var(--forest-green); color: var(--white); }
 
-        .size-toggle { display: flex; gap: 1rem; margin-top: 0.5rem; }
+        .size-toggle { display: flex; gap: 0.75rem; margin-top: 0.5rem; }
 
         .size-btn {
-            flex: 1; padding: 1rem;
+            flex: 1; padding: 0.6rem 0.75rem;
             border: 2px solid var(--tan);
-            border-radius: 12px;
+            border-radius: 8px;
             background: var(--white);
             cursor: pointer;
             transition: all 0.2s ease;
@@ -103,37 +114,83 @@
 
         .size-btn:hover { border-color: var(--forest-green); background: var(--cream-light); }
         .size-btn.active { border-color: var(--forest-green); background: linear-gradient(135deg, rgba(69, 90, 48, 0.08) 0%, rgba(69, 90, 48, 0.04) 100%); }
-        .size-btn .size-title { font-weight: 700; font-size: 1.1rem; color: var(--brown-dark); }
-        .size-btn .size-desc { font-size: 0.85rem; color: var(--brown-medium); margin-top: 0.25rem; }
+        .size-btn .size-title { font-weight: 700; font-size: 1rem; color: var(--brown-dark); }
+        .size-btn .size-desc { font-size: 0.75rem; color: var(--brown-medium); margin-top: 0.15rem; }
         .size-btn.active .size-title { color: var(--forest-green); }
 
-        .species-toggle { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
-        .species-btn {
-            flex: 1; padding: 0.75rem 0.5rem;
+        /* Species tile selector */
+        .species-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; margin-top: 0.5rem; }
+        .species-tile {
+            position: relative;
+            padding: 0.75rem;
             border: 2px solid var(--tan);
-            border-radius: 8px;
+            border-radius: 10px;
             background: var(--white);
             cursor: pointer;
             transition: all 0.2s ease;
-            font-weight: 700;
-            font-size: 1.1rem;
-            color: var(--brown-dark);
         }
-        .species-btn:hover { border-color: var(--forest-green); background: var(--cream-light); }
-        .species-btn.active { border-color: var(--forest-green); background: var(--forest-green); color: var(--white); }
+        .species-tile:hover { border-color: var(--forest-green); background: var(--cream-light); }
+        .species-tile.selected { border-color: var(--forest-green); background: linear-gradient(135deg, rgba(69, 90, 48, 0.08) 0%, rgba(69, 90, 48, 0.04) 100%); }
+        .species-tile.disabled { opacity: 0.6; cursor: not-allowed; }
+        .species-tile.disabled:hover { border-color: var(--tan); background: var(--white); }
+        .species-checkbox {
+            position: absolute; top: 0.5rem; right: 0.5rem;
+            width: 18px; height: 18px; border: 2px solid var(--tan);
+            border-radius: 4px; background: var(--white);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .species-tile.selected .species-checkbox { border-color: var(--forest-green); background: var(--forest-green); }
+        .species-checkbox::after {
+            content: ''; display: none; width: 5px; height: 9px;
+            border: solid var(--white); border-width: 0 2px 2px 0; transform: rotate(45deg);
+        }
+        .species-tile.selected .species-checkbox::after { display: block; }
+        .species-name { font-weight: 700; font-size: 0.95rem; color: var(--brown-dark); margin-bottom: 0.15rem; }
+        .species-latin { font-size: 0.75rem; color: var(--brown-medium); font-style: italic; margin-bottom: 0.4rem; }
+        .species-info { font-size: 0.7rem; color: var(--brown-medium); line-height: 1.4; }
+        .species-info span { display: block; }
+        .species-tile.disabled .species-name { color: var(--brown-medium); }
+        .coming-soon-badge {
+            font-size: 0.65rem; font-weight: 600; color: var(--blue-accent);
+            background: rgba(84, 93, 163, 0.1); padding: 0.15rem 0.4rem;
+            border-radius: 4px; display: inline-block; margin-top: 0.25rem;
+        }
 
         /* 3D Visualization */
         .viz-section { padding: 1.5rem 2rem; background: var(--cream-light); border-top: 1px solid var(--cream); }
-        .viz-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+        .viz-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
         .viz-header h3 { font-size: 1rem; font-weight: 600; color: var(--brown-dark); }
         .viz-stats { font-size: 0.85rem; color: var(--brown-medium); }
+        .tent-dimensions {
+            text-align: center; padding: 0.5rem; margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #2a3a1f 0%, #1a2612 100%);
+            border-radius: 8px 8px 0 0; color: var(--white); font-weight: 600; font-size: 1.1rem;
+        }
+        .tent-dimensions span { color: var(--tan); }
+
+        .viz-wrapper {
+            position: relative;
+            display: flex;
+            background: linear-gradient(135deg, #2a3a1f 0%, #1a2612 100%);
+            border-radius: 0 0 12px 12px;
+            overflow: hidden;
+        }
+
+        .viz-legend {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: 10;
+        }
+        .viz-legend-item { display: flex; align-items: center; gap: 0.4rem; font-size: 0.7rem; color: rgba(255,255,255,0.8); }
+        .viz-legend-color { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
 
         #viz-container {
-            width: 100%; height: 350px;
-            border-radius: 12px;
+            flex: 1; height: 350px;
             overflow: hidden;
             cursor: grab;
-            background: linear-gradient(135deg, #2a3a1f 0%, #1a2612 100%);
         }
         #viz-container:active { cursor: grabbing; }
 
@@ -163,9 +220,6 @@
             font-style: italic;
         }
 
-        .viz-legend { display: flex; gap: 1.5rem; margin-top: 0.75rem; font-size: 0.8rem; color: var(--brown-medium); flex-wrap: wrap; }
-        .viz-legend-item { display: flex; align-items: center; gap: 0.4rem; }
-        .viz-legend-color { width: 12px; height: 12px; border-radius: 2px; }
 
         .results-section {
             background: linear-gradient(135deg, var(--brown-dark) 0%, var(--brown-medium) 100%);
@@ -178,11 +232,11 @@
         .results-header .target { font-size: 1.8rem; font-weight: 700; }
         .results-header .cycle-info { font-size: 0.95rem; color: var(--tan); margin-top: 0.5rem; }
 
-        .results-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
-        .result-card { background: rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 1.25rem; backdrop-filter: blur(10px); }
-        .result-card .label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--tan); margin-bottom: 0.5rem; }
-        .result-card .value { font-size: 1.5rem; font-weight: 700; }
-        .result-card .detail { font-size: 0.85rem; color: rgba(255, 255, 255, 0.7); margin-top: 0.25rem; }
+        .results-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; }
+        .result-card { background: rgba(255, 255, 255, 0.1); border-radius: 10px; padding: 1rem; backdrop-filter: blur(10px); }
+        .result-card .label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--tan); margin-bottom: 0.35rem; }
+        .result-card .value { font-size: 1.3rem; font-weight: 700; }
+        .result-card .detail { font-size: 0.75rem; color: rgba(255, 255, 255, 0.7); margin-top: 0.2rem; }
 
         .spec-sheet { margin-top: 1.5rem; background: rgba(0, 0, 0, 0.2); border-radius: 12px; padding: 1.5rem; }
         .spec-sheet h3 { font-size: 1rem; color: var(--tan); margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.05em; }
@@ -194,7 +248,7 @@
         .spec-list .spec-qty { font-weight: 600; width: 3rem; text-align: center; color: var(--tan); }
         .spec-list .spec-value { font-weight: 600; text-align: right; }
 
-        .tip-box { margin-top: 1.5rem; background: rgba(69, 90, 48, 0.3); border-left: 4px solid var(--forest-green-light); border-radius: 0 8px 8px 0; padding: 1rem 1.25rem; }
+        .tip-box { margin-bottom: 1.25rem; background: rgba(69, 90, 48, 0.3); border-left: 4px solid var(--forest-green-light); border-radius: 0 8px 8px 0; padding: 0.85rem 1.25rem; }
         .tip-box .tip-title { font-weight: 600; color: var(--forest-green-light); margin-bottom: 0.25rem; font-size: 0.9rem; }
         .tip-box p { font-size: 0.9rem; color: rgba(255, 255, 255, 0.9); }
 
@@ -212,6 +266,11 @@
         footer a { color: var(--forest-green); text-decoration: none; }
         footer a:hover { text-decoration: underline; }
 
+        @media (max-width: 768px) {
+            .results-grid { grid-template-columns: repeat(2, 1fr); }
+            .species-grid { grid-template-columns: 1fr; }
+        }
+
         @media (max-width: 600px) {
             .container { padding: 1rem; }
             h1 { font-size: 1.5rem; }
@@ -219,7 +278,7 @@
             .slider-value { font-size: 2rem; }
             .size-toggle { flex-direction: column; }
             .results-grid { grid-template-columns: 1fr 1fr; }
-            .result-card .value { font-size: 1.2rem; }
+            .result-card .value { font-size: 1.1rem; }
             #viz-container { height: 280px; }
         }
     </style>
@@ -233,17 +292,10 @@
 
         <div class="calculator-card">
             <div class="input-section">
-                <div class="input-group">
-                    <label>Average Weekly Harvest</label>
-                    <p class="input-hint">Target fresh mushroom yield (averaged across 4-week cycle)</p>
-                    <div class="slider-container">
-                        <input type="range" id="yield-slider" min="1" max="150" step="1" value="10">
-                        <div class="slider-value"><span id="yield-value">10</span> <span>kg/week avg</span></div>
-                        <div class="slider-labels">
-                            <span>1 kg</span>
-                            <span>75 kg</span>
-                            <span>150 kg</span>
-                        </div>
+                <div class="unit-toggle-container">
+                    <div class="unit-toggle">
+                        <button class="unit-btn active" data-unit="metric">Metric</button>
+                        <button class="unit-btn" data-unit="imperial">Imperial</button>
                     </div>
                 </div>
 
@@ -252,40 +304,103 @@
                     <p class="input-hint">Master's mix supplemented block weight</p>
                     <div class="size-toggle">
                         <button class="size-btn active" data-size="5">
-                            <div class="size-title">5 lb</div>
-                            <div class="size-desc">2.3 kg · 9"×7"×7"</div>
+                            <div class="size-title">2.3 kg</div>
+                            <div class="size-desc">23×18×18 cm</div>
                         </button>
                         <button class="size-btn" data-size="10">
-                            <div class="size-title">10 lb</div>
-                            <div class="size-desc">4.5 kg · 11"×9"×9"</div>
+                            <div class="size-title">4.5 kg</div>
+                            <div class="size-desc">28×23×23 cm</div>
                         </button>
                     </div>
                 </div>
 
                 <div class="input-group">
-                    <label>Number of Species</label>
-                    <p class="input-hint">3+ species uses two separate chambers for isolation</p>
-                    <div class="species-toggle">
-                        <button class="species-btn active" data-species="1">1</button>
-                        <button class="species-btn" data-species="2">2</button>
-                        <button class="species-btn" data-species="3">3</button>
-                        <button class="species-btn" data-species="4">4</button>
-                        <button class="species-btn" data-species="5">5</button>
-                        <button class="species-btn" data-species="6">6</button>
+                    <label>Species Selection</label>
+                    <p class="input-hint">Select species to grow (incompatible temps use separate chambers)</p>
+                    <div class="species-grid">
+                        <div class="species-tile selected" data-species="blue-oyster" data-fruit-temp="cold">
+                            <div class="species-checkbox"></div>
+                            <div class="species-name">Blue Oyster</div>
+                            <div class="species-latin">Pleurotus ostreatus var. columbinus</div>
+                            <div class="species-info">
+                                <span>Incubation: 12-14 days @ 21-24°C (70-75°F)</span>
+                                <span>Fruiting: 10-14°C (50-57°F)</span>
+                                <span>Pinning: 3-5 days from cutting</span>
+                                <span>Harvest: 5-7 days from pins</span>
+                            </div>
+                        </div>
+                        <div class="species-tile" data-species="lions-mane" data-fruit-temp="warm">
+                            <div class="species-checkbox"></div>
+                            <div class="species-name">Lion's Mane</div>
+                            <div class="species-latin">Hericium erinaceus</div>
+                            <div class="species-info">
+                                <span>Incubation: 14-21 days @ 21-24°C (70-75°F)</span>
+                                <span>Fruiting: 15-18°C (59-65°F)</span>
+                                <span>Pinning: 5-7 days from cutting</span>
+                                <span>Harvest: 7-10 days from pins</span>
+                            </div>
+                        </div>
+                        <div class="species-tile" data-species="chestnut" data-fruit-temp="warm">
+                            <div class="species-checkbox"></div>
+                            <div class="species-name">Chestnut</div>
+                            <div class="species-latin">Pholiota adiposa</div>
+                            <div class="species-info">
+                                <span>Incubation: 14-21 days @ 21-24°C (70-75°F)</span>
+                                <span>Fruiting: 15-18°C (59-65°F)</span>
+                                <span>Pinning: 7-10 days from cutting</span>
+                                <span>Harvest: 5-7 days from pins</span>
+                            </div>
+                        </div>
+                        <div class="species-tile" data-species="pioppino" data-fruit-temp="warm">
+                            <div class="species-checkbox"></div>
+                            <div class="species-name">Pioppino</div>
+                            <div class="species-latin">Cyclocybe aegerita</div>
+                            <div class="species-info">
+                                <span>Incubation: 21-28 days @ 21-24°C (70-75°F)</span>
+                                <span>Fruiting: 15-18°C (59-65°F)</span>
+                                <span>Pinning: 10-14 days from cutting</span>
+                                <span>Harvest: 7-10 days from pins</span>
+                            </div>
+                        </div>
+                        <div class="species-tile" data-species="shiitake" data-fruit-temp="cold">
+                            <div class="species-checkbox"></div>
+                            <div class="species-name">Shiitake</div>
+                            <div class="species-latin">Lentinula edodes</div>
+                            <div class="species-info">
+                                <span>Incubation: 60-90 days @ 21-24°C (70-75°F)</span>
+                                <span>Fruiting: 10-16°C (50-60°F)</span>
+                                <span>Pinning: 7-14 days from cold shock</span>
+                                <span>Harvest: 5-8 days from pins</span>
+                            </div>
+                        </div>
+                        <div class="species-tile" data-species="king-oyster" data-fruit-temp="cold">
+                            <div class="species-checkbox"></div>
+                            <div class="species-name">King Oyster</div>
+                            <div class="species-latin">Pleurotus eryngii</div>
+                            <div class="species-info">
+                                <span>Incubation: 14-21 days @ 21-24°C (70-75°F)</span>
+                                <span>Fruiting: 12-16°C (54-60°F)</span>
+                                <span>Pinning: 5-7 days from cutting</span>
+                                <span>Harvest: 7-10 days from pins</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Average Weekly Harvest</label>
+                    <p class="input-hint">Target fresh mushroom yield (averaged across 4-week cycle)</p>
+                    <div class="slider-container">
+                        <input type="range" id="yield-slider" min="1" max="150" step="1" value="10">
+                        <div class="slider-value"><span id="yield-value">10</span> <span id="yield-unit">kg/week avg</span></div>
                     </div>
                 </div>
 
                 <div class="input-group">
                     <label>Biological Efficiency</label>
-                    <p class="input-hint">BE% = Fresh Yield / (Block Weight × 40% dry fraction)</p>
                     <div class="slider-container">
                         <input type="range" id="be-slider" min="0" max="150" step="5" value="70">
                         <div class="slider-value"><span id="be-value">70</span><span>% BE</span></div>
-                        <div class="slider-labels">
-                            <span>0%</span>
-                            <span>75%</span>
-                            <span>150%</span>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -296,7 +411,30 @@
                     <h3>Chamber Layout</h3>
                     <span class="viz-stats" id="viz-stats">Drag to rotate</span>
                 </div>
-                <div id="viz-container"></div>
+                <div class="tent-dimensions" id="tent-dimensions">
+                    <span id="tent-dims-display">4' × 4' × 6.5'</span> <span id="tent-dims-metric">(1.2m × 1.2m × 2.0m)</span>
+                </div>
+                <div class="viz-wrapper">
+                    <div class="viz-legend">
+                        <div class="viz-legend-item">
+                            <div class="viz-legend-color" style="background: #d9bf90;"></div>
+                            <span>Tent</span>
+                        </div>
+                        <div class="viz-legend-item">
+                            <div class="viz-legend-color" style="background: #888;"></div>
+                            <span>Shelving</span>
+                        </div>
+                        <div class="viz-legend-item">
+                            <div class="viz-legend-color" style="background: #f5f5f5;"></div>
+                            <span>Blocks</span>
+                        </div>
+                        <div class="viz-legend-item">
+                            <div class="viz-legend-color" style="background: #8a9bab;"></div>
+                            <span>Fruiting</span>
+                        </div>
+                    </div>
+                    <div id="viz-container"></div>
+                </div>
                 <div class="week-selector">
                     <button class="week-btn active" data-week="1">Week 1</button>
                     <button class="week-btn" data-week="2">Week 2</button>
@@ -305,24 +443,6 @@
                 <div class="week-description" id="week-description">
                     First batch enters fruiting chamber (no pins yet)
                 </div>
-                <div class="viz-legend">
-                    <div class="viz-legend-item">
-                        <div class="viz-legend-color" style="background: #d9bf90;"></div>
-                        <span>Tent frame</span>
-                    </div>
-                    <div class="viz-legend-item">
-                        <div class="viz-legend-color" style="background: #888;"></div>
-                        <span>Wire shelving</span>
-                    </div>
-                    <div class="viz-legend-item">
-                        <div class="viz-legend-color" style="background: #f5f5f5;"></div>
-                        <span>Substrate blocks</span>
-                    </div>
-                    <div class="viz-legend-item">
-                        <div class="viz-legend-color" style="background: #8a9bab;"></div>
-                        <span>Fruiting</span>
-                    </div>
-                </div>
             </div>
 
             <div class="results-section">
@@ -330,6 +450,11 @@
                     <h2>BATCH SETUP</h2>
                     <div class="target" id="target-display">3 kg/week avg</div>
                     <div class="cycle-info" id="cycle-info">~4 kg weeks 1-3, week 4 cleaning</div>
+                </div>
+
+                <div class="tip-box" id="tip-box">
+                    <div class="tip-title">Batch Cycle</div>
+                    <p id="tip-text">3 weeks production, 1 week cleaning/restart. Full clean between batches reduces contamination risk.</p>
                 </div>
 
                 <div class="results-grid">
@@ -446,11 +571,6 @@
                     </div>
                 </div>
 
-                <div class="tip-box" id="tip-box">
-                    <div class="tip-title">Batch Cycle</div>
-                    <p id="tip-text">3 weeks production, 1 week cleaning/restart. Full clean between batches reduces contamination risk.</p>
-                </div>
-
                 <button class="copy-btn" onclick="copySpecs()">Copy Spec Sheet</button>
             </div>
         </div>
@@ -528,12 +648,18 @@
         // STATE
         // ============================================================
 
-        let currentYield = 10;
+        let currentYield = 10;  // Always stored in kg internally
         let currentBlockSize = 5;
         let currentBE = 70;
-        let currentSpecies = 1;
+        let selectedSpecies = ['blue-oyster'];  // Array of selected species IDs
         let currentWeek = 1;
+        let currentUnit = 'metric';  // 'metric' or 'imperial'
         let currentCalcData = null;
+
+        // Unit conversion helpers
+        const KG_TO_LB = 2.20462;
+        const FT_TO_M = 0.3048;
+        const IN_TO_CM = 2.54;
 
         // ============================================================
         // CAPACITY CALCULATION - The core logic
@@ -1114,8 +1240,23 @@
             const blocksNeeded = yieldPerBlock > 0 ? Math.ceil(totalCycleYield / yieldPerBlock) : 0;
             const prodWeekYield = blocksNeeded > 0 ? (blocksNeeded * yieldPerBlock) / PRODUCTION_WEEKS : 0;
 
-            // Determine if we need dual tents (3+ species)
-            const numTents = currentSpecies >= 3 ? 2 : 1;
+            // Determine if we need dual tents based on:
+            // 1. 3+ species
+            // 2. Incompatible fruiting temperatures (cold vs warm species mixed)
+            const numSpecies = selectedSpecies.length;
+
+            // Check temperature compatibility
+            const speciesTiles = document.querySelectorAll('.species-tile.selected');
+            let hasCold = false, hasWarm = false;
+            speciesTiles.forEach(tile => {
+                const temp = tile.dataset.fruitTemp;
+                if (temp === 'cold') hasCold = true;
+                if (temp === 'warm') hasWarm = true;
+            });
+            const incompatibleTemps = hasCold && hasWarm;
+
+            // Need 2 tents if 3+ species OR incompatible temperatures
+            const numTents = (numSpecies >= 3 || incompatibleTemps) ? 2 : 1;
             const blocksPerTent = Math.ceil(blocksNeeded / numTents);
 
             // Find best tent based on blocks per tent
@@ -1166,7 +1307,7 @@
 
             const calcData = {
                 block, yieldPerBlock, blocksNeeded, blocksPerTent, prodWeekYield,
-                tent, config, ft3, m3, numTents,
+                tent, config, ft3, m3, numTents, incompatibleTemps,
                 exchangesPerHour, targetCfm, fanRatedCfm, fanRec, fanSize,
                 fogger, dutyCycle, discLifeMonthsMin, discLifeMonthsMax,
                 runHoursPerDay
@@ -1178,12 +1319,65 @@
         }
 
         function updateDisplay(data) {
-            const { block, yieldPerBlock, blocksNeeded, blocksPerTent, prodWeekYield, tent, config, ft3, m3, numTents,
+            const { block, yieldPerBlock, blocksNeeded, blocksPerTent, prodWeekYield, tent, config, ft3, m3, numTents, incompatibleTemps,
                     exchangesPerHour, targetCfm, fanRatedCfm, fanRec, fanSize,
                     fogger, dutyCycle, discLifeMonthsMin, discLifeMonthsMax, runHoursPerDay } = data;
 
-            document.getElementById('target-display').textContent = `${currentYield} kg/week avg`;
-            document.getElementById('cycle-info').textContent = `~${prodWeekYield.toFixed(1)} kg weeks 1-3, week 4 cleaning`;
+            const isMetric = currentUnit === 'metric';
+            const numSpecies = selectedSpecies.length;
+
+            // Format weight based on unit
+            const formatWeight = (kg) => isMetric ? `${kg.toFixed(1)} kg` : `${(kg * KG_TO_LB).toFixed(1)} lb`;
+            const formatWeightShort = (kg) => isMetric ? `${kg.toFixed(2)} kg` : `${(kg * KG_TO_LB).toFixed(2)} lb`;
+
+            // Format tent dimensions
+            const formatTentDims = (t) => {
+                if (isMetric) {
+                    const wM = (t.w * FT_TO_M).toFixed(1);
+                    const dM = (t.d * FT_TO_M).toFixed(1);
+                    const hM = (t.h * FT_TO_M).toFixed(1);
+                    return `${wM}m × ${dM}m × ${hM}m`;
+                }
+                return t.dims;
+            };
+
+            // Format volume
+            const formatVolume = (ft3Val) => {
+                if (isMetric) {
+                    return `${(ft3Val * 0.0283168).toFixed(1)} m³`;
+                }
+                return `${Math.round(ft3Val)} ft³`;
+            };
+
+            // Format block dimensions
+            const formatBlockDims = (b) => {
+                if (isMetric) {
+                    const wCm = Math.round(b.w * IN_TO_CM);
+                    const dCm = Math.round(b.d * IN_TO_CM);
+                    const hCm = Math.round(b.h * IN_TO_CM);
+                    return `${wCm}×${dCm}×${hCm} cm`;
+                }
+                return `${b.w}"×${b.d}"×${b.h}"`;
+            };
+
+            // Update tent dimensions display
+            const tentDimsDisplay = document.getElementById('tent-dims-display');
+            const tentDimsMetric = document.getElementById('tent-dims-metric');
+            if (numTents > 1) {
+                tentDimsDisplay.textContent = `${numTents}× ${formatTentDims(tent)}`;
+                tentDimsMetric.textContent = isMetric ? '' : `(${(tent.w * FT_TO_M).toFixed(1)}m × ${(tent.d * FT_TO_M).toFixed(1)}m × ${(tent.h * FT_TO_M).toFixed(1)}m each)`;
+            } else {
+                tentDimsDisplay.textContent = formatTentDims(tent);
+                tentDimsMetric.textContent = isMetric ? '' : `(${(tent.w * FT_TO_M).toFixed(1)}m × ${(tent.d * FT_TO_M).toFixed(1)}m × ${(tent.h * FT_TO_M).toFixed(1)}m)`;
+            }
+
+            // Display yield in current unit
+            const displayYield = isMetric ? currentYield : currentYield * KG_TO_LB;
+            const yieldUnit = isMetric ? 'kg/week avg' : 'lb/week avg';
+            document.getElementById('yield-unit').textContent = yieldUnit;
+
+            document.getElementById('target-display').textContent = `${formatWeight(currentYield)}/week avg`;
+            document.getElementById('cycle-info').textContent = `~${formatWeight(prodWeekYield)} weeks 1-3, week 4 cleaning`;
 
             document.getElementById('blocks-value').textContent = blocksNeeded;
             document.getElementById('blocks-detail').textContent = numTents > 1
@@ -1191,12 +1385,10 @@
                 : `capacity: ${config.capacity}`;
 
             const totalFt3 = ft3 * numTents;
-            document.getElementById('chamber-value').textContent = numTents > 1
-                ? `${totalFt3} ft³`
-                : `${ft3} ft³`;
+            document.getElementById('chamber-value').textContent = formatVolume(numTents > 1 ? totalFt3 : ft3);
             document.getElementById('chamber-detail').textContent = numTents > 1
-                ? `${numTents}× ${tent.dims}`
-                : tent.dims;
+                ? `${numTents}× ${formatTentDims(tent)}`
+                : formatTentDims(tent);
 
             document.getElementById('fae-value').textContent = fanSize;
             document.getElementById('fae-detail').textContent = numTents > 1
@@ -1209,19 +1401,22 @@
                 : `~${Math.round(dutyCycle)}% duty cycle`;
 
             // Spec sheet
-            document.getElementById('spec-target').textContent = `${currentYield} kg/week`;
-            document.getElementById('spec-species').textContent = currentSpecies;
-            document.getElementById('spec-prod-weeks').textContent = `~${prodWeekYield.toFixed(1)} kg/wk for 3 weeks`;
-            document.getElementById('spec-block-size').textContent = `${block.label} (${block.w}"×${block.d}"×${block.h}")`;
+            document.getElementById('spec-target').textContent = `${formatWeight(currentYield)}/week`;
+            document.getElementById('spec-species').textContent = numSpecies;
+            document.getElementById('spec-prod-weeks').textContent = `~${formatWeight(prodWeekYield)}/wk for 3 weeks`;
+
+            // Block size display
+            const blockLabel = isMetric ? `${block.weight_kg} kg` : `${block.weight_lb} lb`;
+            document.getElementById('spec-block-size').textContent = `${blockLabel} (${formatBlockDims(block)})`;
             document.getElementById('spec-be').textContent = `${currentBE}%`;
-            document.getElementById('spec-yield-block').textContent = `${yieldPerBlock.toFixed(2)} kg`;
+            document.getElementById('spec-yield-block').textContent = formatWeightShort(yieldPerBlock);
 
             // Blocks with quantity
             document.getElementById('spec-blocks').textContent = numTents > 1 ? `${blocksPerTent} per tent` : blocksNeeded;
             document.getElementById('spec-blocks-qty').textContent = numTents > 1 ? `×${numTents}` : '';
 
             // Chamber with quantity
-            document.getElementById('spec-chamber').textContent = `${tent.dims} (${ft3} ft³)`;
+            document.getElementById('spec-chamber').textContent = `${formatTentDims(tent)} (${formatVolume(ft3)})`;
             document.getElementById('spec-chamber-qty').textContent = numTents > 1 ? `×${numTents}` : '';
 
             const utilizationPct = Math.round((blocksPerTent / config.capacity) * 100);
@@ -1249,19 +1444,30 @@
 
             // Tips
             const tipText = document.getElementById('tip-text');
+            const tipTitle = document.querySelector('.tip-title');
             if (currentBE === 0) {
+                tipTitle.textContent = "Note";
                 tipText.textContent = "Set biological efficiency above 0% to calculate block requirements.";
             } else if (yieldPerBlock < 0.1) {
+                tipTitle.textContent = "Note";
                 tipText.textContent = "Very low BE results in minimal yield per block.";
+            } else if (incompatibleTemps && numTents > 1) {
+                tipTitle.textContent = "Dual Chambers Required";
+                tipText.textContent = "Cold-fruiting species (10-16°C) and warm-fruiting species (15-18°C) need separate chambers. Harvest split equally between tents.";
             } else if (numTents > 1) {
-                tipText.textContent = `${currentSpecies} species split across ${numTents} chambers for isolation. Each tent runs independently.`;
+                tipTitle.textContent = "Dual Chambers";
+                tipText.textContent = `${numSpecies} species split across ${numTents} chambers for isolation. Each tent runs independently with half the harvest target.`;
             } else if (utilizationPct > 90) {
-                tipText.textContent = "Tent is nearly full. Good efficiency, but leave room for airflow.";
+                tipTitle.textContent = "High Utilization";
+                tipText.textContent = "Tent is nearly full. Good efficiency, but leave room for airflow between blocks.";
             } else if (utilizationPct < 50 && blocksNeeded > 10) {
+                tipTitle.textContent = "Extra Capacity";
                 tipText.textContent = "Tent has extra capacity. Consider a smaller tent or plan for growth.";
             } else if (config.needsWalkway) {
+                tipTitle.textContent = "Layout";
                 tipText.textContent = "Perimeter shelving layout with center walkway for access and harvesting.";
             } else {
+                tipTitle.textContent = "Batch Cycle";
                 tipText.textContent = "3 weeks production, 1 week cleaning/restart. Full clean between batches reduces contamination risk.";
             }
         }
@@ -1319,13 +1525,57 @@
             });
         });
 
-        // Species selector buttons
-        const speciesBtns = document.querySelectorAll('.species-btn');
-        speciesBtns.forEach(btn => {
+        // Unit toggle buttons
+        const unitBtns = document.querySelectorAll('.unit-btn');
+        unitBtns.forEach(btn => {
             btn.addEventListener('click', () => {
-                speciesBtns.forEach(b => b.classList.remove('active'));
+                unitBtns.forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
-                currentSpecies = parseInt(btn.dataset.species);
+                currentUnit = btn.dataset.unit;
+                updateBlockSizeDisplay();
+                if (currentCalcData) {
+                    updateDisplay(currentCalcData);
+                }
+            });
+        });
+
+        // Update block size button display based on current unit
+        function updateBlockSizeDisplay() {
+            const isMetric = currentUnit === 'metric';
+            sizeBtns.forEach(btn => {
+                const size = parseInt(btn.dataset.size);
+                const block = BLOCK_DIMS[size];
+                const title = btn.querySelector('.size-title');
+                const desc = btn.querySelector('.size-desc');
+                if (isMetric) {
+                    title.textContent = `${block.weight_kg} kg`;
+                    const wCm = Math.round(block.w * IN_TO_CM);
+                    const dCm = Math.round(block.d * IN_TO_CM);
+                    const hCm = Math.round(block.h * IN_TO_CM);
+                    desc.textContent = `${wCm}×${dCm}×${hCm} cm`;
+                } else {
+                    title.textContent = `${block.weight_lb} lb`;
+                    desc.textContent = `${block.w}"×${block.d}"×${block.h}"`;
+                }
+            });
+        }
+
+        // Species tile selection (multi-select checkboxes)
+        const speciesTilesAll = document.querySelectorAll('.species-tile');
+        speciesTilesAll.forEach(tile => {
+            tile.addEventListener('click', () => {
+                const speciesId = tile.dataset.species;
+
+                if (tile.classList.contains('selected')) {
+                    // Don't allow deselecting if it's the only one selected
+                    if (selectedSpecies.length > 1) {
+                        tile.classList.remove('selected');
+                        selectedSpecies = selectedSpecies.filter(s => s !== speciesId);
+                    }
+                } else {
+                    tile.classList.add('selected');
+                    selectedSpecies.push(speciesId);
+                }
                 calculate();
             });
         });
@@ -1351,6 +1601,7 @@
         });
 
         initThreeJS();
+        updateBlockSizeDisplay();
         calculate();
     </script>
 </body>
