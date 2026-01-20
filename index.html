@@ -466,35 +466,36 @@
             let shelvingConfig = [];
             const needsWalkway = tentW > 48 || tentD > 48;
 
+            // facing: direction mushrooms point (towards walkway/harvester)
+            // 0 = +Z (forward), PI/2 = -X (left), -PI/2 = +X (right), PI = -Z (back)
             if (tentW <= 36 && tentD <= 36) {
-                // Small tent: single rack against back wall
-                // Rack width = tent width - 2" clearance each side
+                // Small tent: single rack against back wall, mushrooms face door
                 const rackW = tentW - 4;
                 const rackD = Math.min(SHELF_DEPTH, tentD - 4);
-                shelvingConfig.push({ w: rackW, d: rackD, x: 0, z: -(tentD/2) + rackD/2 + 2 });
+                shelvingConfig.push({ w: rackW, d: rackD, x: 0, z: -(tentD/2) + rackD/2 + 2, facing: 0 });
             } else if (!needsWalkway) {
                 // Medium tent: shelving on back wall, maybe sides
                 const rackW = tentW - 4;
                 const rackD = Math.min(SHELF_DEPTH, tentD - 4);
-                shelvingConfig.push({ w: rackW, d: rackD, x: 0, z: -(tentD/2) + rackD/2 + 2 });
+                shelvingConfig.push({ w: rackW, d: rackD, x: 0, z: -(tentD/2) + rackD/2 + 2, facing: 0 });
 
-                // Add side shelves if tent is deep enough
+                // Add side shelves if tent is deep enough - face towards center
                 if (tentD > 36) {
                     const sideRackD = tentD - SHELF_DEPTH - 8;
-                    shelvingConfig.push({ w: SHELF_DEPTH, d: sideRackD, x: -(tentW/2) + SHELF_DEPTH/2 + 2, z: SHELF_DEPTH/2 });
-                    shelvingConfig.push({ w: SHELF_DEPTH, d: sideRackD, x: (tentW/2) - SHELF_DEPTH/2 - 2, z: SHELF_DEPTH/2 });
+                    shelvingConfig.push({ w: SHELF_DEPTH, d: sideRackD, x: -(tentW/2) + SHELF_DEPTH/2 + 2, z: SHELF_DEPTH/2, facing: -Math.PI/2 });
+                    shelvingConfig.push({ w: SHELF_DEPTH, d: sideRackD, x: (tentW/2) - SHELF_DEPTH/2 - 2, z: SHELF_DEPTH/2, facing: Math.PI/2 });
                 }
             } else {
                 // Large tent: perimeter shelving with walkway
-                // Back wall rack
+                // Back wall rack - face towards walkway (+Z)
                 const backRackW = tentW - 4;
-                shelvingConfig.push({ w: backRackW, d: SHELF_DEPTH, x: 0, z: -(tentD/2) + SHELF_DEPTH/2 + 2 });
+                shelvingConfig.push({ w: backRackW, d: SHELF_DEPTH, x: 0, z: -(tentD/2) + SHELF_DEPTH/2 + 2, facing: 0 });
 
-                // Side racks (leaving space for walkway at front)
+                // Side racks - face towards center walkway
                 const sideRackD = tentD - SHELF_DEPTH - WALKWAY_WIDTH - 4;
                 if (sideRackD > 12) {
-                    shelvingConfig.push({ w: SHELF_DEPTH, d: sideRackD, x: -(tentW/2) + SHELF_DEPTH/2 + 2, z: -(WALKWAY_WIDTH/2) });
-                    shelvingConfig.push({ w: SHELF_DEPTH, d: sideRackD, x: (tentW/2) - SHELF_DEPTH/2 - 2, z: -(WALKWAY_WIDTH/2) });
+                    shelvingConfig.push({ w: SHELF_DEPTH, d: sideRackD, x: -(tentW/2) + SHELF_DEPTH/2 + 2, z: -(WALKWAY_WIDTH/2), facing: -Math.PI/2 });
+                    shelvingConfig.push({ w: SHELF_DEPTH, d: sideRackD, x: (tentW/2) - SHELF_DEPTH/2 - 2, z: -(WALKWAY_WIDTH/2), facing: Math.PI/2 });
                 }
             }
 
@@ -703,24 +704,25 @@
         }
 
         // Create realistic oyster mushroom cluster
-        function createMushroomCluster(blockW, blockH, blockD) {
+        // facingAngle: rotation in radians for which direction mushrooms face (0 = +Z, PI/2 = +X, etc)
+        function createMushroomCluster(blockW, blockH, blockD, facingAngle = 0) {
             const cluster = new THREE.Group();
 
-            // Materials
+            // Materials - grey-blue oyster coloring
             const capTopMat = new THREE.MeshStandardMaterial({
-                color: 0xcfbfa8,
+                color: 0x8a9bab,  // Grey-blue cap
                 roughness: 0.7,
                 metalness: 0.0,
                 side: THREE.DoubleSide
             });
             const capBottomMat = new THREE.MeshStandardMaterial({
-                color: 0xf5efe6,
+                color: 0xe8e6e2,  // Pale grey-white gills
                 roughness: 0.5,
                 metalness: 0.0,
                 side: THREE.DoubleSide
             });
             const stemMat = new THREE.MeshStandardMaterial({
-                color: 0xf8f4ed,
+                color: 0xf0eeea,  // Off-white stems
                 roughness: 0.6,
                 metalness: 0.0
             });
@@ -823,6 +825,9 @@
                 cluster.add(mushroom);
             }
 
+            // Rotate entire cluster to face the walking path
+            cluster.rotation.y = facingAngle;
+
             return cluster;
         }
 
@@ -919,9 +924,15 @@
                             blockMesh.position.set(bx, by, bz);
                             tentGroup.add(blockMesh);
 
-                            // Add mushroom cluster growing from front of block
-                            const mushrooms = createMushroomCluster(blockW, blockH, blockD);
-                            mushrooms.position.set(bx, by - blockH * 0.1, bz + blockD/2);
+                            // Add mushroom cluster - face towards walking path
+                            const facing = shelf.facing || 0;
+                            const mushrooms = createMushroomCluster(blockW, blockH, blockD, facing);
+
+                            // Position mushrooms on the side facing the walkway
+                            const mushroomOffset = blockD / 2 + 0.02;
+                            const mx = bx + Math.sin(facing) * mushroomOffset;
+                            const mz = bz + Math.cos(facing) * mushroomOffset;
+                            mushrooms.position.set(mx, by - blockH * 0.1, mz);
                             tentGroup.add(mushrooms);
 
                             blocksPlaced++;
