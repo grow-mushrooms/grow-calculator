@@ -30,7 +30,7 @@
             line-height: 1.6;
         }
 
-        .container { max-width: 900px; margin: 0 auto; padding: 2rem 1rem; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem 1rem; }
 
         header { text-align: center; margin-bottom: 2rem; }
         h1 { font-size: 2rem; font-weight: 700; color: var(--brown-dark); margin-bottom: 0.5rem; }
@@ -88,7 +88,7 @@
         .slider-value span { font-size: 1rem; color: var(--brown-medium); font-weight: 400; }
 
         /* Unit toggle at top */
-        .unit-toggle-container { display: flex; justify-content: flex-end; margin-bottom: 1rem; }
+        .unit-toggle-container { display: flex; justify-content: flex-start; margin-bottom: 1rem; }
         .unit-toggle {
             display: flex; gap: 0; border: 2px solid var(--tan); border-radius: 8px; overflow: hidden;
         }
@@ -123,6 +123,38 @@
         .species-tile {
             position: relative;
             padding: 0.75rem;
+        }
+        .species-tent-badge {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            font-size: 0.6rem;
+            font-weight: 600;
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            background: var(--forest-green);
+            color: white;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        .species-tile.selected .species-tent-badge {
+            opacity: 1;
+        }
+        .species-group-badge {
+            position: absolute;
+            bottom: 0.5rem;
+            right: 0.5rem;
+            font-size: 0.6rem;
+            font-weight: 600;
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            display: none;
+        }
+        .species-group-badge.cold { background: #3b82f6; color: white; display: block; }
+        .species-group-badge.warm { background: #f97316; color: white; display: block; }
+        .species-group-badge.short { background: #22c55e; color: white; display: block; }
+        .species-group-badge.long { background: #8b5cf6; color: white; display: block; }
+        .species-tile {
             border: 2px solid var(--tan);
             border-radius: 10px;
             background: var(--white);
@@ -134,7 +166,7 @@
         .species-tile.disabled { opacity: 0.6; cursor: not-allowed; }
         .species-tile.disabled:hover { border-color: var(--tan); background: var(--white); }
         .species-checkbox {
-            position: absolute; top: 0.5rem; right: 0.5rem;
+            position: absolute; top: 0.5rem; left: 0.5rem;
             width: 18px; height: 18px; border: 2px solid var(--tan);
             border-radius: 4px; background: var(--white);
             display: flex; align-items: center; justify-content: center;
@@ -145,7 +177,7 @@
             border: solid var(--white); border-width: 0 2px 2px 0; transform: rotate(45deg);
         }
         .species-tile.selected .species-checkbox::after { display: block; }
-        .species-name { font-weight: 700; font-size: 0.95rem; color: var(--brown-dark); margin-bottom: 0.15rem; }
+        .species-name { font-weight: 700; font-size: 0.95rem; color: var(--brown-dark); margin-bottom: 0.15rem; padding-left: 1.75rem; }
         .species-latin { font-size: 0.75rem; color: var(--brown-medium); font-style: italic; margin-bottom: 0.4rem; }
         .species-info { font-size: 0.7rem; color: var(--brown-medium); line-height: 1.4; }
         .species-info span { display: block; }
@@ -194,32 +226,200 @@
         }
         #viz-container:active { cursor: grabbing; }
 
-        .week-selector { display: flex; gap: 0.5rem; margin-top: 1rem; justify-content: center; }
-        .week-btn {
-            padding: 0.5rem 1.25rem;
-            border: 2px solid var(--tan);
-            border-radius: 8px;
-            background: var(--white);
-            color: var(--brown-dark);
-            font-weight: 600;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
+        /* Day-based slider styles */
+        .day-sliders-container {
+            margin-top: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
         }
-        .week-btn:hover { border-color: var(--forest-green); background: var(--cream-light); }
-        .week-btn.active {
-            border-color: var(--forest-green);
-            background: var(--forest-green);
-            color: var(--white);
+        .day-slider-group {
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
         }
-        .week-description {
-            text-align: center;
-            font-size: 0.85rem;
-            color: var(--brown-medium);
+        .tent-timeline-container {
+            display: flex;
+            gap: 0;
             margin-top: 0.5rem;
-            font-style: italic;
         }
-
+        .timeline-species-labels {
+            display: flex;
+            flex-direction: column;
+            padding-top: 24px; /* Space for slider */
+            gap: 1px;
+        }
+        .timeline-species-labels .batch-chart-species-label {
+            height: 20px;
+            display: flex;
+            align-items: center;
+        }
+        .timeline-grid-area {
+            flex: 1;
+            min-width: 0;
+        }
+        .day-slider-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        .day-slider-label {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--brown-dark);
+        }
+        .day-slider-label .temp-badge {
+            display: inline-block;
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-right: 0.5rem;
+        }
+        .temp-badge.cold {
+            background: rgba(59, 130, 246, 0.15);
+            color: #2563eb;
+        }
+        .temp-badge.warm {
+            background: rgba(249, 115, 22, 0.15);
+            color: #ea580c;
+        }
+        .current-day-display {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--forest-green);
+        }
+        .day-slider-track {
+            position: relative;
+            height: 24px;
+            display: flex;
+            align-items: center;
+        }
+        .day-slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 4px;
+            border-radius: 2px;
+            background: rgba(0,0,0,0.15);
+            outline: none;
+            cursor: pointer;
+            margin: 0;
+        }
+        .day-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #1f2937;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+        .day-slider::-moz-range-thumb {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #1f2937;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+        .slider-mark {
+            position: relative;
+            text-align: center;
+        }
+        .slider-mark::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: 6px;
+            background: var(--tan);
+        }
+        /* Batch Chart Styles (used by integrated timeline) */
+        .batch-chart-species-label {
+            width: 100px;
+            min-width: 100px;
+            display: flex;
+            align-items: center;
+            padding-right: 0.5rem;
+            font-size: 0.65rem;
+            font-weight: 500;
+            color: var(--brown-dark);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .batch-chart-species-label .species-color-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 0.4rem;
+            flex-shrink: 0;
+        }
+        .batch-chart-cells {
+            display: flex;
+            flex: 1;
+            gap: 0;
+            position: relative;
+            height: 20px;
+            margin-bottom: 3px;
+        }
+        .batch-chart-cell {
+            flex: 1;
+            min-width: 0;
+            height: 100%;
+            border-radius: 0;
+        }
+        .batch-chart-cell:first-child {
+            border-radius: 3px 1px 1px 3px;
+        }
+        .batch-chart-cell:last-child {
+            border-radius: 1px 3px 3px 1px;
+        }
+        .day-indicator {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #1f2937;
+            pointer-events: none;
+            z-index: 10;
+            transition: left 0.1s ease-out;
+            box-shadow: 0 0 4px rgba(0,0,0,0.3);
+        }
+        .day-indicator::before {
+            content: '';
+            position: absolute;
+            top: -4px;
+            left: -3px;
+            width: 8px;
+            height: 8px;
+            background: #1f2937;
+            border-radius: 50%;
+        }
+        .chart-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid var(--cream);
+        }
+        .chart-legend span {
+            display: flex;
+            align-items: center;
+            font-size: 0.7rem;
+            color: var(--brown-medium);
+        }
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+            margin-right: 0.35rem;
+        }
 
         .results-section {
             background: linear-gradient(135deg, var(--brown-dark) 0%, var(--brown-medium) 100%);
@@ -230,8 +430,6 @@
         .results-header { text-align: center; margin-bottom: 1.5rem; }
         .results-header h2 { font-size: 1.3rem; font-weight: 600; color: var(--tan); margin-bottom: 0.25rem; }
         .results-header .target { font-size: 1.8rem; font-weight: 700; }
-        .results-header .cycle-info { font-size: 0.95rem; color: var(--tan); margin-top: 0.5rem; }
-
         .results-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; }
         .result-card { background: rgba(255, 255, 255, 0.1); border-radius: 10px; padding: 1rem; backdrop-filter: blur(10px); }
         .result-card .label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--tan); margin-bottom: 0.35rem; }
@@ -239,7 +437,7 @@
         .result-card .detail { font-size: 0.75rem; color: rgba(255, 255, 255, 0.7); margin-top: 0.2rem; }
 
         .spec-sheet { margin-top: 1.5rem; background: rgba(0, 0, 0, 0.2); border-radius: 12px; padding: 1.5rem; }
-        .spec-sheet h3 { font-size: 1rem; color: var(--tan); margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        .spec-sheet h3 { font-size: 1rem; color: var(--tan); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; }
 
         .spec-list { font-family: 'SF Mono', 'Monaco', 'Consolas', monospace; font-size: 0.9rem; line-height: 1.8; }
         .spec-list .spec-row { display: flex; border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding: 0.5rem 0; }
@@ -248,9 +446,87 @@
         .spec-list .spec-qty { font-weight: 600; width: 3rem; text-align: center; color: var(--tan); }
         .spec-list .spec-value { font-weight: 600; text-align: right; }
 
-        .tip-box { margin-bottom: 1.25rem; background: rgba(69, 90, 48, 0.3); border-left: 4px solid var(--forest-green-light); border-radius: 0 8px 8px 0; padding: 0.85rem 1.25rem; }
-        .tip-box .tip-title { font-weight: 600; color: var(--forest-green-light); margin-bottom: 0.25rem; font-size: 0.9rem; }
-        .tip-box p { font-size: 0.9rem; color: rgba(255, 255, 255, 0.9); }
+        .spec-section { margin-bottom: 1.5rem; }
+        .spec-section:last-child { margin-bottom: 0; }
+        .spec-section h4 { font-size: 0.85rem; color: var(--tan); margin: 0 0 0.5rem 0; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 0.5rem; }
+
+        /* Supplies table with cost columns */
+        .supplies-header { display: flex; font-size: 0.75rem; color: rgba(255,255,255,0.5); text-transform: uppercase; padding: 0.25rem 0; border-bottom: 1px solid rgba(255,255,255,0.15); margin-bottom: 0.25rem; }
+        .supplies-header .col-item { flex: 1; }
+        .supplies-header .col-qty { width: 3rem; text-align: center; }
+        .supplies-header .col-cost { width: 5rem; text-align: right; }
+
+        .spec-row .spec-cost { font-weight: 600; width: 5rem; text-align: right; color: var(--cream); }
+
+        .supplies-total { display: flex; border-top: 2px solid rgba(255,255,255,0.3); padding-top: 0.75rem; margin-top: 0.5rem; font-weight: 700; }
+        .supplies-total .total-label { flex: 1; color: var(--tan); }
+        .supplies-total .total-value { width: 5rem; text-align: right; color: var(--tan); font-size: 1.1rem; }
+
+        /* Collapsible Sizing Calculations */
+        .sizing-calcs {
+            margin: 1.5rem 0;
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .sizing-calcs summary {
+            padding: 1rem 1.5rem;
+            background: rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--tan);
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            list-style: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .sizing-calcs summary::-webkit-details-marker { display: none; }
+        .sizing-calcs summary::before {
+            content: '▶';
+            font-size: 0.7rem;
+            transition: transform 0.2s ease;
+        }
+        .sizing-calcs[open] summary::before { transform: rotate(90deg); }
+        .sizing-calcs-content {
+            padding: 1.5rem;
+            font-size: 0.9rem;
+            line-height: 1.7;
+        }
+        .sizing-calcs-content h4 {
+            color: var(--tan);
+            font-size: 0.95rem;
+            margin: 1.5rem 0 0.75rem 0;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.15);
+        }
+        .sizing-calcs-content h4:first-child { margin-top: 0; }
+        .sizing-calcs-content p { margin: 0.5rem 0; color: rgba(255,255,255,0.85); }
+        .sizing-calcs-content .calc-step {
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 0.75rem 0;
+            font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+            font-size: 0.85rem;
+        }
+        .sizing-calcs-content .calc-result {
+            color: var(--tan);
+            font-weight: 600;
+        }
+        .sizing-calcs-content .calc-note {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.6);
+            font-style: italic;
+            margin-top: 0.5rem;
+        }
+        .sizing-calcs-content ul {
+            margin: 0.5rem 0;
+            padding-left: 1.5rem;
+        }
+        .sizing-calcs-content li { margin: 0.25rem 0; }
 
         .copy-btn {
             display: block; width: 100%; margin-top: 1.5rem; padding: 1rem;
@@ -265,10 +541,88 @@
         footer { text-align: center; padding: 2rem 1rem; color: var(--brown-medium); font-size: 0.9rem; }
         footer a { color: var(--forest-green); text-decoration: none; }
         footer a:hover { text-decoration: underline; }
+        .footer-logo { max-width: 180px; height: auto; margin-bottom: 0.75rem; opacity: 0.8; }
+
+        /* Community Banner */
+        .community-banner {
+            background: linear-gradient(135deg, var(--forest-green) 0%, var(--forest-green-light) 100%);
+            color: white; border-radius: 12px; padding: 1.25rem 1.5rem;
+            margin-bottom: 1.5rem; text-align: center;
+        }
+        .community-banner p { margin: 0 0 0.75rem 0; font-size: 1rem; }
+        .cta-btn {
+            display: inline-block; padding: 0.6rem 1.5rem;
+            background: white; color: var(--forest-green);
+            border-radius: 8px; font-weight: 600; font-size: 0.9rem;
+            text-decoration: none; transition: all 0.2s ease;
+        }
+        .cta-btn:hover { background: var(--cream); transform: translateY(-1px); }
+
+        /* Promo Section */
+        .promo-section {
+            background: linear-gradient(135deg, var(--cream) 0%, var(--cream-light) 100%);
+            border: 2px solid var(--tan); border-radius: 16px;
+            padding: 2rem; margin-top: 2rem; text-align: center;
+        }
+        .promo-section h3 { color: var(--brown-dark); font-size: 1.4rem; margin: 0 0 1rem 0; }
+        .promo-section p { color: var(--brown-dark); font-size: 1rem; line-height: 1.6; margin: 0 0 0.75rem 0; }
+        .promo-section .promo-note { font-size: 0.9rem; color: var(--brown-medium); font-style: italic; }
+        .promo-cta {
+            margin-top: 1rem; padding: 0.75rem 2rem;
+            background: var(--forest-green); color: white; font-size: 1rem;
+        }
+        .promo-cta:hover { background: var(--forest-green-light); }
+
+        /* Admonition */
+        .admonition {
+            border-radius: 8px; padding: 1rem 1.25rem; margin-bottom: 1rem;
+        }
+        .admonition.warning {
+            background: rgba(234, 179, 8, 0.15);
+            border-left: 4px solid #eab308;
+        }
+        .admonition.warning .admonition-title { color: #ca8a04; }
+        .admonition.warning p { color: white; }
+        .admonition.info {
+            background: rgba(59, 130, 246, 0.15);
+            border-left: 4px solid #3b82f6;
+            margin: 1rem 0;
+        }
+        .admonition.info .admonition-title { color: #3b82f6; }
+        .admonition-title {
+            font-weight: 600; font-size: 0.9rem; margin-bottom: 0.4rem;
+        }
+        .admonition p { font-size: 0.85rem; color: var(--brown-medium); margin: 0; line-height: 1.5; }
+
+        /* Slider subvalue */
+        .slider-subvalue { font-size: 0.85rem; color: var(--brown-medium); text-align: center; margin-top: 0.25rem; }
+
+        /* Split selector */
+        .split-label { font-size: 0.85rem; color: var(--brown-medium); margin-bottom: 0.5rem; }
+        .split-selector { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; flex-wrap: wrap; }
+        .split-option {
+            padding: 0.4rem 0.75rem; border: 2px solid var(--tan); border-radius: 6px;
+            background: white; font-size: 0.8rem; font-weight: 500; color: var(--brown-medium);
+            cursor: pointer; transition: all 0.2s ease;
+        }
+        .split-option:hover { border-color: var(--forest-green); background: var(--cream-light); }
+        .split-option.selected { border-color: var(--forest-green); background: rgba(69, 90, 48, 0.1); color: var(--forest-green); }
+
+        /* Yield per block estimate */
+        .yield-per-block { font-size: 0.85rem; color: var(--brown-medium); margin-top: 0.5rem; font-style: italic; }
+
+        @media (max-width: 1024px) {
+            .container { max-width: 100%; }
+        }
 
         @media (max-width: 768px) {
             .results-grid { grid-template-columns: repeat(2, 1fr); }
             .species-grid { grid-template-columns: 1fr; }
+            .timeline-species-labels .batch-chart-species-label {
+                width: 80px;
+                min-width: 80px;
+                font-size: 0.6rem;
+            }
         }
 
         @media (max-width: 600px) {
@@ -280,6 +634,21 @@
             .results-grid { grid-template-columns: 1fr 1fr; }
             .result-card .value { font-size: 1.1rem; }
             #viz-container { height: 280px; }
+            .tent-timeline-container {
+                flex-direction: column;
+            }
+            .timeline-species-labels {
+                flex-direction: row;
+                flex-wrap: wrap;
+                padding-top: 0;
+                margin-bottom: 0.5rem;
+                gap: 0.5rem;
+            }
+            .timeline-species-labels .batch-chart-species-label {
+                width: auto;
+                min-width: auto;
+                height: auto;
+            }
         }
     </style>
 </head>
@@ -287,8 +656,14 @@
     <div class="container">
         <header>
             <h1>Fruiting Chamber Calculator</h1>
-            <p class="subtitle">Size your batch setup from target yield</p>
+            <p class="subtitle">Pick your goal, design your fruiting chamber</p>
         </header>
+
+        <div class="community-banner">
+            <p>🍄 This tool was inspired by our free mycology community on Skool.</p>
+            <p>💡 It's a work-in-progress. If you see any mistakes or have ideas on how to improve it, click the button below to join the conversation..</p>
+            <a href="https://www.skool.com/heartwood-9407/" target="_blank" class="cta-btn">Join Now</a>
+        </div>
 
         <div class="calculator-card">
             <div class="input-section">
@@ -316,9 +691,17 @@
 
                 <div class="input-group">
                     <label>Species Selection</label>
-                    <p class="input-hint">Select species to grow (incompatible temps use separate chambers)</p>
+                    <p class="split-label">How do you want to separate your strains?</p>
+                    <div class="split-selector">
+                        <button class="split-option selected" data-split="none">No Split</button>
+                        <button class="split-option" data-split="temperature">By Temperature</button>
+                        <button class="split-option" data-split="duration">By Duration</button>
+                    </div>
+                    <p class="input-hint">Select species to grow</p>
                     <div class="species-grid">
                         <div class="species-tile selected" data-species="blue-oyster" data-fruit-temp="cold">
+                            <div class="species-tent-badge">Tent 1</div>
+                            <div class="species-group-badge"></div>
                             <div class="species-checkbox"></div>
                             <div class="species-name">Blue Oyster</div>
                             <div class="species-latin">Pleurotus ostreatus var. columbinus</div>
@@ -330,6 +713,8 @@
                             </div>
                         </div>
                         <div class="species-tile" data-species="lions-mane" data-fruit-temp="warm">
+                            <div class="species-tent-badge">Tent 1</div>
+                            <div class="species-group-badge"></div>
                             <div class="species-checkbox"></div>
                             <div class="species-name">Lion's Mane</div>
                             <div class="species-latin">Hericium erinaceus</div>
@@ -341,6 +726,8 @@
                             </div>
                         </div>
                         <div class="species-tile" data-species="chestnut" data-fruit-temp="warm">
+                            <div class="species-tent-badge">Tent 1</div>
+                            <div class="species-group-badge"></div>
                             <div class="species-checkbox"></div>
                             <div class="species-name">Chestnut</div>
                             <div class="species-latin">Pholiota adiposa</div>
@@ -352,6 +739,8 @@
                             </div>
                         </div>
                         <div class="species-tile" data-species="pioppino" data-fruit-temp="warm">
+                            <div class="species-tent-badge">Tent 1</div>
+                            <div class="species-group-badge"></div>
                             <div class="species-checkbox"></div>
                             <div class="species-name">Pioppino</div>
                             <div class="species-latin">Cyclocybe aegerita</div>
@@ -363,6 +752,8 @@
                             </div>
                         </div>
                         <div class="species-tile" data-species="shiitake" data-fruit-temp="cold">
+                            <div class="species-tent-badge">Tent 1</div>
+                            <div class="species-group-badge"></div>
                             <div class="species-checkbox"></div>
                             <div class="species-name">Shiitake</div>
                             <div class="species-latin">Lentinula edodes</div>
@@ -374,6 +765,8 @@
                             </div>
                         </div>
                         <div class="species-tile" data-species="king-oyster" data-fruit-temp="cold">
+                            <div class="species-tent-badge">Tent 1</div>
+                            <div class="species-group-badge"></div>
                             <div class="species-checkbox"></div>
                             <div class="species-name">King Oyster</div>
                             <div class="species-latin">Pleurotus eryngii</div>
@@ -388,20 +781,26 @@
                 </div>
 
                 <div class="input-group">
-                    <label>Average Weekly Harvest</label>
-                    <p class="input-hint">Target fresh mushroom yield (averaged across 4-week cycle)</p>
+                    <label>Set Your Monthly Harvest Goal</label>
                     <div class="slider-container">
-                        <input type="range" id="yield-slider" min="1" max="150" step="1" value="10">
-                        <div class="slider-value"><span id="yield-value">10</span> <span id="yield-unit">kg/week avg</span></div>
+                        <input type="range" id="yield-slider" min="4" max="92" step="4" value="40">
+                        <div class="slider-value"><span id="yield-value">40</span> <span id="yield-unit">kg/month</span></div>
+                        <div class="slider-subvalue" id="yield-weekly">~10 kg/week equivalent</div>
                     </div>
+                </div>
+
+                <div class="admonition info">
+                    <div class="admonition-title">ℹ️ Single Batch System</div>
+                    <p>This calculator models a single-batch workflow where all substrate blocks are inoculated and fruited together. For staggered or continuous production systems, calculations would differ.</p>
                 </div>
 
                 <div class="input-group">
                     <label>Biological Efficiency</label>
                     <div class="slider-container">
-                        <input type="range" id="be-slider" min="0" max="150" step="5" value="70">
+                        <input type="range" id="be-slider" min="30" max="120" step="5" value="70">
                         <div class="slider-value"><span id="be-value">70</span><span>% BE</span></div>
                     </div>
+                    <div class="yield-per-block" id="yield-per-block">Est. yield: 0.64 kg/block</div>
                 </div>
             </div>
 
@@ -435,26 +834,19 @@
                     </div>
                     <div id="viz-container"></div>
                 </div>
-                <div class="week-selector">
-                    <button class="week-btn active" data-week="1">Week 1</button>
-                    <button class="week-btn" data-week="2">Week 2</button>
-                    <button class="week-btn" data-week="3">Week 3</button>
+                <div class="admonition info" style="margin: 1rem 0 0 0;">
+                    <div class="admonition-title">ℹ️ Layout Note</div>
+                    <p>The tent layouts shown are approximations to give you a general idea. They are not optimized nor recommended placements.</p>
                 </div>
-                <div class="week-description" id="week-description">
-                    First batch enters fruiting chamber (no pins yet)
+                <div class="day-sliders-container" id="day-sliders">
+                    <!-- Generated dynamically per tent group with integrated timeline -->
                 </div>
             </div>
 
             <div class="results-section">
                 <div class="results-header">
                     <h2>BATCH SETUP</h2>
-                    <div class="target" id="target-display">3 kg/week avg</div>
-                    <div class="cycle-info" id="cycle-info">~4 kg weeks 1-3, week 4 cleaning</div>
-                </div>
-
-                <div class="tip-box" id="tip-box">
-                    <div class="tip-title">Batch Cycle</div>
-                    <p id="tip-text">3 weeks production, 1 week cleaning/restart. Full clean between batches reduces contamination risk.</p>
+                    <div class="target" id="target-display">40 kg/month avg</div>
                 </div>
 
                 <div class="results-grid">
@@ -480,93 +872,122 @@
                     </div>
                 </div>
 
+                <details class="sizing-calcs">
+                    <summary>Sizing Calculations 📝</summary>
+                    <div class="sizing-calcs-content" id="sizing-calcs-content">
+                        <h4>1. Chamber Size</h4>
+                        <p>Your chamber needs to fit all your substrate blocks with room for air circulation. Each block needs space on at least one face for mushrooms to fruit.</p>
+                        <div class="calc-step" id="calc-chamber">
+                            Loading calculations...
+                        </div>
+
+                        <h4>2. Fresh Air Exchange (FAE)</h4>
+                        <p>Mushrooms release CO2 as they grow and need fresh oxygen. We recommend 6-8 complete air exchanges per hour to keep CO2 levels low and provide adequate oxygen.</p>
+                        <div class="calc-step" id="calc-fae">
+                            Loading calculations...
+                        </div>
+                        <p class="calc-note">Note: Fans lose 50-70% of their rated airflow due to ducting resistance, so we size the fan 2.5× larger than the target CFM.</p>
+
+                        <h4>3. Humidity Replacement (Fogger Sizing)</h4>
+                        <p>When fresh air exits your chamber, it carries away moisture. We need to calculate how much water is lost and replace it with the fogger.</p>
+
+                        <p><strong>Psychrometric data:</strong> At typical growing temperatures (18-21°C / 65-70°F):</p>
+                        <ul>
+                            <li>Chamber air at 85% RH holds approximately <strong>14.7 g of water per cubic meter</strong> (0.00092 lb/ft³)</li>
+                            <li>Fresh air at 50% RH holds approximately <strong>8.6 g of water per cubic meter</strong> (0.00054 lb/ft³)</li>
+                            <li>Each air exchange loses about <strong>6.1 g/m³</strong> (0.00038 lb/ft³) of moisture</li>
+                        </ul>
+
+                        <div class="calc-step" id="calc-fogger">
+                            Loading calculations...
+                        </div>
+                        <p class="calc-note">We size the fogger so it runs at most 50% duty cycle, extending disc life and providing headroom for humid days.</p>
+                        <div class="admonition warning">
+                            <div class="admonition-title">⚠️ Estimator Only</div>
+                            <p>This tool provides estimates and may contain errors. Always verify calculations independently before making purchasing or business decisions.</p>
+                        </div>    
+                    </div>
+                </details>
+
                 <div class="spec-sheet">
                     <h3>Full Spec Sheet</h3>
-                    <div class="spec-list">
-                        <div class="spec-row">
-                            <span class="spec-label">Target (avg)</span>
-                            <span class="spec-qty"></span>
-                            <span class="spec-value" id="spec-target">10 kg/week</span>
+
+
+                    <div class="spec-section">
+                        <h4>Properties of the System</h4>
+                        <div class="spec-list">
+                            <div class="spec-row">
+                                <span class="spec-label">Target (avg)</span>
+                                <span class="spec-value" id="spec-target">40 kg/month</span>
+                            </div>
+                            <div class="spec-row">
+                                <span class="spec-label">Species</span>
+                                <span class="spec-value" id="spec-species">1</span>
+                            </div>
+                            <div class="spec-row">
+                                <span class="spec-label">Block size</span>
+                                <span class="spec-value" id="spec-block-size">5 lb (2.3 kg)</span>
+                            </div>
+                            <div class="spec-row">
+                                <span class="spec-label">Biological efficiency</span>
+                                <span class="spec-value" id="spec-be">70%</span>
+                            </div>
+                            <div class="spec-row">
+                                <span class="spec-label">Yield per block</span>
+                                <span class="spec-value" id="spec-yield-block">0.64 kg</span>
+                            </div>
+                            <div class="spec-row">
+                                <span class="spec-label">Blocks per batch</span>
+                                <span class="spec-value" id="spec-blocks">62</span>
+                            </div>
+                            <div class="spec-row">
+                                <span class="spec-label">Production weeks</span>
+                                <span class="spec-value" id="spec-prod-weeks">~13 kg/wk for 3 weeks</span>
+                            </div>
+                            <div class="spec-row">
+                                <span class="spec-label">Temperature</span>
+                                <span class="spec-value" id="spec-temp">18-21°C</span>
+                            </div>
                         </div>
-                        <div class="spec-row">
-                            <span class="spec-label">Species</span>
-                            <span class="spec-qty"></span>
-                            <span class="spec-value" id="spec-species">1</span>
+                    </div>
+
+                    <div class="spec-section">
+                        <h4>Supplies</h4>
+                        <div class="supplies-header">
+                            <span class="col-item">Item</span>
+                            <span class="col-qty">Qty</span>
+                            <span class="col-cost">Est. Cost</span>
                         </div>
-                        <div class="spec-row">
-                            <span class="spec-label">Production weeks</span>
-                            <span class="spec-qty"></span>
-                            <span class="spec-value" id="spec-prod-weeks">~13 kg/wk for 3 weeks</span>
+                        <div class="spec-list" id="supplies-list">
+                            <div class="spec-row">
+                                <span class="spec-label" id="supply-tent-label">Grow tent (4'×4'×6.5')</span>
+                                <span class="spec-qty" id="supply-tent-qty">1</span>
+                                <span class="spec-cost" id="supply-tent-cost">$200</span>
+                            </div>
+                            <div class="spec-row">
+                                <span class="spec-label" id="supply-shelving-label">Metal shelving rack</span>
+                                <span class="spec-qty" id="supply-shelving-qty">1</span>
+                                <span class="spec-cost" id="supply-shelving-cost">$60</span>
+                            </div>
+                            <div class="spec-row">
+                                <span class="spec-label" id="supply-fan-label">Inline fan (4", 205 CFM)</span>
+                                <span class="spec-qty" id="supply-fan-qty">1</span>
+                                <span class="spec-cost" id="supply-fan-cost">$110</span>
+                            </div>
+                            <div class="spec-row">
+                                <span class="spec-label" id="supply-controller-label">Humidity controller - Inkbird IHC-200</span>
+                                <span class="spec-qty" id="supply-controller-qty">1</span>
+                                <span class="spec-cost" id="supply-controller-cost">$60</span>
+                            </div>
+                            <div class="spec-row">
+                                <span class="spec-label" id="supply-fogger-label">Ultrasonic fogger - House of Hydro 1-disc</span>
+                                <span class="spec-qty" id="supply-fogger-qty">1</span>
+                                <span class="spec-cost" id="supply-fogger-cost">$45</span>
+                            </div>
                         </div>
-                        <div class="spec-row">
-                            <span class="spec-label">Block size</span>
-                            <span class="spec-qty"></span>
-                            <span class="spec-value" id="spec-block-size">5 lb (2.3 kg)</span>
-                        </div>
-                        <div class="spec-row">
-                            <span class="spec-label">Biological efficiency</span>
-                            <span class="spec-qty"></span>
-                            <span class="spec-value" id="spec-be">70%</span>
-                        </div>
-                        <div class="spec-row">
-                            <span class="spec-label">Yield per block</span>
-                            <span class="spec-qty"></span>
-                            <span class="spec-value" id="spec-yield-block">0.64 kg</span>
-                        </div>
-                        <div class="spec-row">
-                            <span class="spec-label">Blocks per batch</span>
-                            <span class="spec-qty" id="spec-blocks-qty"></span>
-                            <span class="spec-value" id="spec-blocks">62</span>
-                        </div>
-                        <div class="spec-row">
-                            <span class="spec-label">Chamber</span>
-                            <span class="spec-qty" id="spec-chamber-qty"></span>
-                            <span class="spec-value" id="spec-chamber">4' × 4' × 6.5'</span>
-                        </div>
-                        <div class="spec-row">
-                            <span class="spec-label">Capacity (per chamber)</span>
-                            <span class="spec-qty"></span>
-                            <span class="spec-value" id="spec-capacity">72 blocks (86% used)</span>
-                        </div>
-                        <div class="spec-row">
-                            <span class="spec-label">Shelving (per chamber)</span>
-                            <span class="spec-qty" id="spec-shelving-qty"></span>
-                            <span class="spec-value" id="spec-shelving">1× rack, 4 levels</span>
-                        </div>
-                        <div class="spec-row">
-                            <span class="spec-label">FAE target (per chamber)</span>
-                            <span class="spec-qty"></span>
-                            <span class="spec-value" id="spec-fae">8 exch/hr → 17 CFM</span>
-                        </div>
-                        <div class="spec-row">
-                            <span class="spec-label">Fan (w/ ducting)</span>
-                            <span class="spec-qty" id="spec-fan-qty"></span>
-                            <span class="spec-value" id="spec-fan">4" inline (~108 CFM rated)</span>
-                        </div>
-                        <div class="spec-row">
-                            <span class="spec-label">Humidity controller</span>
-                            <span class="spec-qty" id="spec-humidity-qty"></span>
-                            <span class="spec-value">85% RH (Inkbird IHC-200)</span>
-                        </div>
-                        <div class="spec-row">
-                            <span class="spec-label">Fogger</span>
-                            <span class="spec-qty" id="spec-fogger-qty"></span>
-                            <span class="spec-value" id="spec-fogger">House of Hydro 1-disc</span>
-                        </div>
-                        <div class="spec-row">
-                            <span class="spec-label">Duty Cycle</span>
-                            <span class="spec-qty"></span>
-                            <span class="spec-value" id="spec-duty">~7%</span>
-                        </div>
-                        <div class="spec-row">
-                            <span class="spec-label">Disc Life</span>
-                            <span class="spec-qty"></span>
-                            <span class="spec-value" id="spec-life">4-6 years</span>
-                        </div>
-                        <div class="spec-row">
-                            <span class="spec-label">Temperature</span>
-                            <span class="spec-qty"></span>
-                            <span class="spec-value">18-21°C</span>
+                        <div class="supplies-total">
+                            <span class="total-label">Estimated Total</span>
+                            <span class="total-value" id="supply-total">$475 CAD</span>
                         </div>
                     </div>
                 </div>
@@ -575,12 +996,124 @@
             </div>
         </div>
 
+        <div class="promo-section">
+            <h3>Ready to Start Growing?</h3>
+            <p>Skip the setup and start harvesting fresh gourmet mushrooms at home. Our ready-to-fruit grow kits produce multiple flushes of delicious oyster, lion's mane, and more - no equipment needed.</p>
+            <p class="promo-note">Ships across Canada. Perfect for beginners or as gifts for the mushroom-curious.</p>
+            <a href="https://heartwoodmushrooms.ca/collections/grow-kits" target="_blank" class="cta-btn promo-cta">Shop Grow Kits</a>
+        </div>
+
         <footer>
-            Calculator by <a href="https://heartwoodmushrooms.ca" target="_blank">Heartwood Mushrooms</a>
+            <img src="https://heartwoodmushrooms.ca/cdn/shop/files/HeartwoodMushrooms_Charcoal.png?v=1621713649&width=600" alt="Heartwood Mushrooms" class="footer-logo">
+            <p>Calculator by <a href="https://heartwoodmushrooms.ca" target="_blank">Heartwood Mushrooms</a></p>
         </footer>
     </div>
 
     <script>
+        // ============================================================
+        // SPECIES DATA - Timing and colors for each species
+        // ============================================================
+
+        const SPECIES_DATA = {
+            'blue-oyster': {
+                name: 'Blue Oyster',
+                tempGroup: 'cold',
+                fruitingTemp: '10-14°C (50-57°F)',
+                timing: {
+                    pinning: { min: 3, max: 5 },
+                    harvest: { min: 5, max: 7 },
+                    rest: { min: 5, max: 7 },
+                    secondPinning: { min: 3, max: 5 },
+                    secondHarvest: { min: 5, max: 7 }
+                },
+                color: { cap: 0x2563eb, stem: 0xf0eeea, gills: 0xdbeafe }  // Vibrant blue
+            },
+            'lions-mane': {
+                name: "Lion's Mane",
+                tempGroup: 'warm',
+                fruitingTemp: '15-18°C (59-65°F)',
+                timing: {
+                    pinning: { min: 5, max: 7 },
+                    harvest: { min: 7, max: 10 },
+                    rest: { min: 5, max: 7 },
+                    secondPinning: { min: 5, max: 7 },
+                    secondHarvest: { min: 7, max: 10 }
+                },
+                color: { cap: 0xfef3c7, stem: 0xfefce8, gills: 0xfef9c3 }  // Cream/pale yellow
+            },
+            'chestnut': {
+                name: 'Chestnut',
+                tempGroup: 'warm',
+                fruitingTemp: '15-18°C (59-65°F)',
+                timing: {
+                    pinning: { min: 7, max: 10 },
+                    harvest: { min: 5, max: 7 },
+                    rest: { min: 5, max: 7 },
+                    secondPinning: { min: 7, max: 10 },
+                    secondHarvest: { min: 5, max: 7 }
+                },
+                color: { cap: 0xb45309, stem: 0xfcd34d, gills: 0xfef3c7 }  // Rich amber/chestnut
+            },
+            'pioppino': {
+                name: 'Pioppino',
+                tempGroup: 'warm',
+                fruitingTemp: '15-18°C (59-65°F)',
+                timing: {
+                    pinning: { min: 10, max: 14 },
+                    harvest: { min: 7, max: 10 },
+                    rest: { min: 5, max: 7 },
+                    secondPinning: { min: 10, max: 14 },
+                    secondHarvest: { min: 7, max: 10 }
+                },
+                color: { cap: 0x7c2d12, stem: 0xfed7aa, gills: 0xffedd5 }  // Dark brown
+            },
+            'shiitake': {
+                name: 'Shiitake',
+                tempGroup: 'cold',
+                fruitingTemp: '10-16°C (50-60°F)',
+                timing: {
+                    pinning: { min: 7, max: 14 },
+                    harvest: { min: 5, max: 8 },
+                    rest: { min: 7, max: 14 },
+                    secondPinning: { min: 7, max: 14 },
+                    secondHarvest: { min: 5, max: 8 }
+                },
+                color: { cap: 0x451a03, stem: 0xd6d3d1, gills: 0xfafaf9 }  // Dark chocolate brown
+            },
+            'king-oyster': {
+                name: 'King Oyster',
+                tempGroup: 'cold',
+                fruitingTemp: '12-16°C (54-60°F)',
+                timing: {
+                    pinning: { min: 5, max: 7 },
+                    harvest: { min: 7, max: 10 },
+                    rest: { min: 5, max: 7 },
+                    secondPinning: { min: 5, max: 7 },
+                    secondHarvest: { min: 7, max: 10 }
+                },
+                color: { cap: 0xd4a574, stem: 0xfafaf9, gills: 0xf5f5f4 }  // Tan/beige cap
+            }
+        };
+
+        // Batch stages with colors for the timeline chart
+        // Both pinnings share same color, both harvests share same color
+        const BATCH_STAGES = {
+            STARTING: { name: 'Starting', color: '#6b7280' },
+            PINNING: { name: 'Pinning', color: '#3b82f6' },
+            HARVEST: { name: 'Harvest', color: '#22c55e' },
+            REST: { name: 'Rest', color: '#f59e0b' },
+            SECOND_PINNING: { name: 'Pinning', color: '#3b82f6' },  // Same as PINNING
+            SECOND_HARVEST: { name: 'Harvest', color: '#22c55e' },  // Same as HARVEST
+            RESET: { name: 'Reset', color: '#ef4444' },
+            NEXT_BATCH: { name: 'Next Batch', color: '#9ca3af' }
+        };
+
+        // Maximum number of tents allowed
+        const MAX_TENTS = 4;
+
+        // Maximum yield to prevent browser crashes (50 lbs ≈ 23 kg)
+        const MAX_YIELD_KG = 92;  // Monthly max (~23 kg/week)
+
         // ============================================================
         // PHYSICAL DIMENSIONS (all in inches for calculations)
         // ============================================================
@@ -619,7 +1152,8 @@
             { dims: "5' × 5' × 7'", w: 5, d: 5, h: 7 },
             { dims: "8' × 4' × 7'", w: 8, d: 4, h: 7 },
             { dims: "8' × 8' × 7'", w: 8, d: 8, h: 7 },
-            { dims: "10' × 10' × 8'", w: 10, d: 10, h: 8 }
+            { dims: "10' × 10' × 8'", w: 10, d: 10, h: 8 },
+            { dims: "10' × 20' × 8'", w: 10, d: 20, h: 8 }
         ];
 
         // ============================================================
@@ -637,24 +1171,30 @@
         // Static pressure from ducting reduces effective CFM by 50-70%
         const DUCT_LOSS_FACTOR = 2.5;  // Fan needs 2.5× rated CFM to deliver target
 
+        // House of Hydro ultrasonic foggers - complete product line
+        // Prices: USD converted to CAD at 1.40 exchange rate (Jan 2026)
+        // Output: mL/hr from manufacturer specs
         const FOGGERS = [
-            { name: "1-disc", fullName: "House of Hydro 1-disc", output: 500 },
-            { name: "3-disc", fullName: "House of Hydro 3-disc", output: 1500 },
-            { name: "5-disc", fullName: "House of Hydro 5-disc", output: 1900 },
-            { name: "12-disc", fullName: "House of Hydro 12-disc", output: 6000 }
+            { discs: 1,  output: 500,  priceUSD: 29.99,  priceCAD: 45,  fullName: "House of Hydro 1-disc" },
+            { discs: 3,  output: 1500, priceUSD: 99.99,  priceCAD: 145, fullName: "House of Hydro 3-disc" },
+            { discs: 5,  output: 1900, priceUSD: 149.99, priceCAD: 215, fullName: "House of Hydro 5-disc" },
+            { discs: 9,  output: 2500, priceUSD: 199.99, priceCAD: 285, fullName: "House of Hydro 9-disc" },
+            { discs: 12, output: 6000, priceUSD: 249.99, priceCAD: 355, fullName: "House of Hydro 12-disc" }
         ];
 
         // ============================================================
         // STATE
         // ============================================================
 
-        let currentYield = 10;  // Always stored in kg internally
+        let currentYield = 40;  // Monthly yield in kg (kg/month)
         let currentBlockSize = 5;
         let currentBE = 70;
         let selectedSpecies = ['blue-oyster'];  // Array of selected species IDs
-        let currentWeek = 1;
         let currentUnit = 'metric';  // 'metric' or 'imperial'
+        let currentSplitMode = 'none';  // 'none', 'temperature', 'duration'
         let currentCalcData = null;
+        let tentGroups = [];  // Array of tent allocation objects from allocateTents()
+        let currentDays = {};  // { 'cold': 0, 'warm': 0 } - current day per temp group
 
         // Unit conversion helpers
         const KG_TO_LB = 2.20462;
@@ -760,6 +1300,161 @@
             return { tent: lastTent, config: calculateTentCapacity(lastTent, blockSize) };
         }
 
+        // Find a smaller tent that can still fit the blocks (for downsizing)
+        function findSmallerTent(blocks, blockSize, currentTentIndex) {
+            for (let i = 0; i < currentTentIndex; i++) {
+                const tent = TENT_SIZES[i];
+                const config = calculateTentCapacity(tent, blockSize);
+                if (config.capacity >= blocks) {
+                    return { tent, config };
+                }
+            }
+            return null;
+        }
+
+        // Calculate the full cycle length for a set of species (in days)
+        function calculateCycleLength(speciesIds) {
+            return speciesIds.reduce((max, id) => {
+                const t = SPECIES_DATA[id].timing;
+                // Total cycle: pinning + harvest + rest + secondPinning + secondHarvest + 2 days reset
+                const total = t.pinning.max + t.harvest.max + t.rest.max + t.secondPinning.max + t.secondHarvest.max + 2;
+                return Math.max(max, total);
+            }, 0);
+        }
+
+        // Get the stage and day ranges for a species
+        function getStagesForSpecies(speciesId) {
+            const t = SPECIES_DATA[speciesId].timing;
+            let day = 0;
+            const stages = {};
+
+            stages.starting = { start: day, end: day };
+
+            stages.pinning = { start: day, end: day + t.pinning.max };
+            day += t.pinning.max;
+
+            stages.harvest = { start: day, end: day + t.harvest.max };
+            day += t.harvest.max;
+
+            stages.rest = { start: day, end: day + t.rest.max };
+            day += t.rest.max;
+
+            stages.secondPinning = { start: day, end: day + t.secondPinning.max };
+            day += t.secondPinning.max;
+
+            stages.secondHarvest = { start: day, end: day + t.secondHarvest.max };
+            day += t.secondHarvest.max;
+
+            stages.reset = { start: day, end: day + 2 };
+
+            return stages;
+        }
+
+        // Get the current stage for a species on a given day
+        function getStageForDay(currentDay, stages) {
+            if (currentDay <= stages.starting.end) return 'starting';
+            if (currentDay <= stages.pinning.end) return 'pinning';
+            if (currentDay <= stages.harvest.end) return 'harvest';
+            if (currentDay <= stages.rest.end) return 'rest';
+            if (currentDay <= stages.secondPinning.end) return 'secondPinning';
+            if (currentDay <= stages.secondHarvest.end) return 'secondHarvest';
+            return 'reset';
+        }
+
+        // Allocate tents for a single temperature group
+        function allocateTentGroup(tempGroup, blocksNeeded, speciesIds, blockSize) {
+            const tents = [];
+            let remaining = blocksNeeded;
+
+            while (remaining > 0 && tents.length < MAX_TENTS) {
+                const { tent, config } = findBestTent(remaining, blockSize);
+                const blocksInTent = Math.min(remaining, config.capacity);
+
+                // Find tent index for potential downsizing
+                const tentIndex = TENT_SIZES.findIndex(t => t.dims === tent.dims);
+
+                tents.push({
+                    tempGroup,
+                    tent,
+                    config,
+                    blocks: blocksInTent,
+                    species: speciesIds,
+                    tentIndex
+                });
+                remaining -= blocksInTent;
+            }
+
+            // Downsize single tent if < 30% utilized
+            if (tents.length === 1 && tents[0].blocks < tents[0].config.capacity * 0.3) {
+                const smaller = findSmallerTent(tents[0].blocks, blockSize, tents[0].tentIndex);
+                if (smaller) {
+                    tents[0].tent = smaller.tent;
+                    tents[0].config = smaller.config;
+                }
+            }
+
+            return tents;
+        }
+
+        // Consolidate tents if we exceed MAX_TENTS
+        function consolidateIfNeeded(tentGroups) {
+            if (tentGroups.length <= MAX_TENTS) return tentGroups;
+
+            // Sort by number of blocks (descending) and keep the most important
+            tentGroups.sort((a, b) => b.blocks - a.blocks);
+            return tentGroups.slice(0, MAX_TENTS);
+        }
+
+        // Get cycle length for a single species
+        function getSpeciesCycleLength(speciesId) {
+            const t = SPECIES_DATA[speciesId].timing;
+            return t.pinning.max + t.harvest.max + t.rest.max + t.secondPinning.max + t.secondHarvest.max + 2;
+        }
+
+        // Main allocation function - splits based on currentSplitMode
+        function allocateTents(blocksNeeded, blockSize, selectedSpeciesIds) {
+            let tentGroups = [];
+            const blocksPerSpecies = blocksNeeded / selectedSpeciesIds.length;
+
+            if (currentSplitMode === 'none') {
+                // All species in one tent group
+                const blocks = Math.ceil(blocksNeeded);
+                tentGroups.push(...allocateTentGroup('mixed', blocks, selectedSpeciesIds, blockSize));
+            } else if (currentSplitMode === 'temperature') {
+                // Group species by temperature
+                const coldSpecies = selectedSpeciesIds.filter(id => SPECIES_DATA[id].tempGroup === 'cold');
+                const warmSpecies = selectedSpeciesIds.filter(id => SPECIES_DATA[id].tempGroup === 'warm');
+
+                const coldBlocks = Math.ceil(coldSpecies.length * blocksPerSpecies);
+                const warmBlocks = Math.ceil(warmSpecies.length * blocksPerSpecies);
+
+                if (coldSpecies.length > 0) {
+                    tentGroups.push(...allocateTentGroup('cold', coldBlocks, coldSpecies, blockSize));
+                }
+                if (warmSpecies.length > 0) {
+                    tentGroups.push(...allocateTentGroup('warm', warmBlocks, warmSpecies, blockSize));
+                }
+            } else if (currentSplitMode === 'duration') {
+                // Group species by cycle duration - Pioppino (57 days) and Shiitake (60 days) are longest
+                // Threshold at 50 days separates them from others (Blue Oyster 33, Lion's Mane/Chestnut/King Oyster 43)
+                const shortCycle = selectedSpeciesIds.filter(id => getSpeciesCycleLength(id) < 50);
+                const longCycle = selectedSpeciesIds.filter(id => getSpeciesCycleLength(id) >= 50);
+
+                const shortBlocks = Math.ceil(shortCycle.length * blocksPerSpecies);
+                const longBlocks = Math.ceil(longCycle.length * blocksPerSpecies);
+
+                if (shortCycle.length > 0) {
+                    tentGroups.push(...allocateTentGroup('short', shortBlocks, shortCycle, blockSize));
+                }
+                if (longCycle.length > 0) {
+                    tentGroups.push(...allocateTentGroup('long', longBlocks, longCycle, blockSize));
+                }
+            }
+
+            // Enforce MAX_TENTS = 4
+            return consolidateIfNeeded(tentGroups);
+        }
+
         // ============================================================
         // THREE.JS VISUALIZATION
         // ============================================================
@@ -767,6 +1462,108 @@
         let scene, camera, renderer, tentGroup;
         let isDragging = false;
         let previousMousePosition = { x: 0, y: 0 };
+
+        // Zoom state
+        let currentZoom = 1.0;          // 1.0 = default (max zoomed out), lower = zoomed in
+        const MIN_ZOOM = 0.15;          // Zoomed in to see a few blocks
+        const MAX_ZOOM = 1.0;           // Default view (max zoomed out)
+        let baseCameraDistance = 10;    // Set by update3DViz based on scene size
+        let baseCameraY = 5;
+        let cameraLookAtY = 0;
+        let pinchStartDistance = 0;
+
+        // Separate groups for static scene (tents/shelves/blocks) and dynamic mushrooms
+        let staticSceneGroup = null;
+        let mushroomGroup = null;
+
+        // Block metadata for mushroom updates without full rebuild
+        // Array of { position: {x,y,z}, speciesId, facing, seed, tempGroup, blockW, blockH, blockD }
+        let blockMetadata = [];
+
+        // Cached materials to avoid recreating per frame
+        let cachedMushroomMaterials = {};
+
+        // Seeded random for deterministic mushroom cluster shapes
+        function seededRandom(seed) {
+            const x = Math.sin(seed * 9999) * 10000;
+            return x - Math.floor(x);
+        }
+
+        // Initialize cached materials for all species
+        function initMaterials() {
+            Object.keys(SPECIES_DATA).forEach(speciesId => {
+                const colors = SPECIES_DATA[speciesId].color;
+                cachedMushroomMaterials[speciesId] = {
+                    cap: new THREE.MeshStandardMaterial({ color: colors.cap, roughness: 0.7, metalness: 0.0, side: THREE.DoubleSide }),
+                    gills: new THREE.MeshStandardMaterial({ color: colors.gills, roughness: 0.5, metalness: 0.0, side: THREE.DoubleSide }),
+                    stem: new THREE.MeshStandardMaterial({ color: colors.stem, roughness: 0.6, metalness: 0.0 })
+                };
+            });
+        }
+
+        // Properly dispose Three.js objects to prevent memory leaks
+        function disposeObject(obj) {
+            if (obj.geometry) {
+                obj.geometry.dispose();
+            }
+            if (obj.material) {
+                if (Array.isArray(obj.material)) {
+                    obj.material.forEach(m => {
+                        if (m.map) m.map.dispose();
+                        m.dispose();
+                    });
+                } else {
+                    if (obj.material.map) obj.material.map.dispose();
+                    obj.material.dispose();
+                }
+            }
+            if (obj.children) {
+                obj.children.forEach(child => disposeObject(child));
+            }
+        }
+
+        // Update only mushroom visibility/scale based on current day - FAST path for day slider
+        function updateMushroomVisibility() {
+            if (!mushroomGroup || !tentGroup) return;
+
+            // Dispose and clear existing mushrooms
+            while (mushroomGroup.children.length > 0) {
+                const child = mushroomGroup.children[0];
+                disposeObject(child);
+                mushroomGroup.remove(child);
+            }
+
+            let totalFruitingBlocks = 0;
+
+            // Recreate mushrooms based on cached block metadata
+            blockMetadata.forEach((block, index) => {
+                const currentDay = currentDays[block.tempGroup] || 0;
+                const visibility = getMushroomVisibility(currentDay, block.speciesId);
+
+                if (visibility.visible) {
+                    const mushrooms = createMushroomCluster(
+                        block.blockW, block.blockH, block.blockD,
+                        block.facing, block.speciesId, block.seed
+                    );
+
+                    const mushroomOffset = block.blockD / 2 + 0.02;
+                    const mx = block.position.x - Math.sin(block.facing) * mushroomOffset;
+                    const mz = block.position.z + Math.cos(block.facing) * mushroomOffset;
+                    mushrooms.position.set(mx, block.position.y - block.blockH * 0.1, mz);
+
+                    // Scale based on growth progress
+                    const scale = 0.5 + visibility.progress * 0.5;
+                    mushrooms.scale.set(scale, scale, scale);
+
+                    mushroomGroup.add(mushrooms);
+                    totalFruitingBlocks++;
+                }
+            });
+
+            // Update stats display
+            document.getElementById('viz-stats').textContent =
+                `${blockMetadata.length} blocks total, ${totalFruitingBlocks} fruiting`;
+        }
 
         function initThreeJS() {
             const container = document.getElementById('viz-container');
@@ -804,6 +1601,12 @@
             tentGroup = new THREE.Group();
             scene.add(tentGroup);
 
+            // Create subgroups: static elements (tents/shelves/blocks) and dynamic mushrooms
+            staticSceneGroup = new THREE.Group();
+            mushroomGroup = new THREE.Group();
+            tentGroup.add(staticSceneGroup);
+            tentGroup.add(mushroomGroup);
+
             container.addEventListener('mousedown', onMouseDown);
             container.addEventListener('mousemove', onMouseMove);
             container.addEventListener('mouseup', onMouseUp);
@@ -811,8 +1614,10 @@
             container.addEventListener('touchstart', onTouchStart, { passive: false });
             container.addEventListener('touchmove', onTouchMove, { passive: false });
             container.addEventListener('touchend', onMouseUp);
+            container.addEventListener('wheel', onWheel, { passive: false });
 
             window.addEventListener('resize', onWindowResize);
+            initMaterials();
             animate();
         }
 
@@ -831,13 +1636,58 @@
             previousMousePosition = { x: e.clientX, y: e.clientY };
         }
         function onMouseUp() { isDragging = false; }
-        function onTouchStart(e) { if (e.touches.length === 1) { e.preventDefault(); isDragging = true; previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY }; } }
-        function onTouchMove(e) {
-            if (!isDragging || e.touches.length !== 1) return;
+
+        // Wheel zoom (desktop)
+        function onWheel(e) {
             e.preventDefault();
-            tentGroup.rotation.y += (e.touches[0].clientX - previousMousePosition.x) * 0.01;
-            tentGroup.rotation.x = Math.max(-0.5, Math.min(0.5, tentGroup.rotation.x + (e.touches[0].clientY - previousMousePosition.y) * 0.005));
-            previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+            const zoomSpeed = 0.001;
+            const delta = e.deltaY * zoomSpeed;
+            currentZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, currentZoom + delta));
+            applyZoom();
+        }
+
+        // Apply current zoom level to camera
+        function applyZoom() {
+            if (!camera) return;
+            const distance = baseCameraDistance * currentZoom;
+            const y = baseCameraY * currentZoom;
+            camera.position.set(distance, y, distance * 1.1);
+            camera.lookAt(0, cameraLookAtY, 0);
+        }
+
+        // Touch handlers with pinch zoom support
+        function onTouchStart(e) {
+            e.preventDefault();
+            if (e.touches.length === 1) {
+                isDragging = true;
+                previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+            } else if (e.touches.length === 2) {
+                isDragging = false;
+                pinchStartDistance = getTouchDistance(e.touches);
+            }
+        }
+        function onTouchMove(e) {
+            e.preventDefault();
+            if (e.touches.length === 1 && isDragging) {
+                // Single finger rotation
+                tentGroup.rotation.y += (e.touches[0].clientX - previousMousePosition.x) * 0.01;
+                tentGroup.rotation.x = Math.max(-0.5, Math.min(0.5, tentGroup.rotation.x + (e.touches[0].clientY - previousMousePosition.y) * 0.005));
+                previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+            } else if (e.touches.length === 2) {
+                // Pinch zoom
+                const currentDistance = getTouchDistance(e.touches);
+                if (pinchStartDistance > 0) {
+                    const pinchDelta = (pinchStartDistance - currentDistance) * 0.002;
+                    currentZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, currentZoom + pinchDelta));
+                    applyZoom();
+                }
+                pinchStartDistance = currentDistance;
+            }
+        }
+        function getTouchDistance(touches) {
+            const dx = touches[0].clientX - touches[1].clientX;
+            const dy = touches[0].clientY - touches[1].clientY;
+            return Math.sqrt(dx * dx + dy * dy);
         }
 
         function animate() { requestAnimationFrame(animate); renderer.render(scene, camera); }
@@ -922,41 +1772,32 @@
 
         // Create realistic oyster mushroom cluster
         // facingAngle: rotation in radians for which direction mushrooms face (0 = +Z, PI/2 = +X, etc)
-        function createMushroomCluster(blockW, blockH, blockD, facingAngle = 0) {
+        // speciesId: species identifier to get colors from SPECIES_DATA
+        // seed: deterministic seed for consistent cluster shapes (based on block index)
+        function createMushroomCluster(blockW, blockH, blockD, facingAngle = 0, speciesId = 'blue-oyster', seed = 0) {
             const cluster = new THREE.Group();
 
-            // Materials - grey-blue oyster coloring
-            const capTopMat = new THREE.MeshStandardMaterial({
-                color: 0x8a9bab,  // Grey-blue cap
-                roughness: 0.7,
-                metalness: 0.0,
-                side: THREE.DoubleSide
-            });
-            const capBottomMat = new THREE.MeshStandardMaterial({
-                color: 0xe8e6e2,  // Pale grey-white gills
-                roughness: 0.5,
-                metalness: 0.0,
-                side: THREE.DoubleSide
-            });
-            const stemMat = new THREE.MeshStandardMaterial({
-                color: 0xf0eeea,  // Off-white stems
-                roughness: 0.6,
-                metalness: 0.0
-            });
+            // Use cached materials (falls back to creating new if not initialized)
+            const materials = cachedMushroomMaterials[speciesId];
+            const capTopMat = materials?.cap || new THREE.MeshStandardMaterial({ color: 0x8a9bab, roughness: 0.7, side: THREE.DoubleSide });
+            const capBottomMat = materials?.gills || new THREE.MeshStandardMaterial({ color: 0xe8e6e2, roughness: 0.5, side: THREE.DoubleSide });
+            const stemMat = materials?.stem || new THREE.MeshStandardMaterial({ color: 0xf0eeea, roughness: 0.6 });
 
             // Scale mushrooms to be almost as large as the block
             const baseCapSize = Math.max(blockW, blockD) * 0.8;
 
-            // Create 5-8 mushrooms in cluster
-            const numMushrooms = 5 + Math.floor(Math.random() * 4);
+            // Create 5-8 mushrooms in cluster (deterministic based on seed)
+            const numMushrooms = 5 + Math.floor(seededRandom(seed) * 4);
 
             for (let i = 0; i < numMushrooms; i++) {
                 const mushroom = new THREE.Group();
+                // Each mushroom gets its own sub-seed for consistent variation
+                const mushroomSeed = seed * 100 + i;
 
-                // Vary cap size
-                const capSize = baseCapSize * (0.5 + Math.random() * 0.6);
-                const capWidth = capSize * (1.0 + Math.random() * 0.3);
-                const capDepth = capSize * (0.7 + Math.random() * 0.3);
+                // Vary cap size (deterministic)
+                const capSize = baseCapSize * (0.5 + seededRandom(mushroomSeed + 1) * 0.6);
+                const capWidth = capSize * (1.0 + seededRandom(mushroomSeed + 2) * 0.3);
+                const capDepth = capSize * (0.7 + seededRandom(mushroomSeed + 3) * 0.3);
                 const capThickness = capSize * 0.08;
 
                 // Create fan/shell shaped cap using lathe geometry with custom profile
@@ -1023,9 +1864,9 @@
                 stem.rotation.x = 0.2;
                 mushroom.add(stem);
 
-                // Position this mushroom in the cluster
+                // Position this mushroom in the cluster (deterministic)
                 const clusterAngle = (i / numMushrooms) * Math.PI * 0.9 - Math.PI * 0.45;
-                const clusterRadius = baseCapSize * 0.15 * (0.5 + Math.random());
+                const clusterRadius = baseCapSize * 0.15 * (0.5 + seededRandom(mushroomSeed + 4));
                 const verticalOffset = (i / numMushrooms - 0.5) * baseCapSize * 0.4;
 
                 mushroom.position.set(
@@ -1034,10 +1875,10 @@
                     Math.cos(clusterAngle) * clusterRadius * 0.3 + baseCapSize * 0.3
                 );
 
-                // Rotate to fan outward
+                // Rotate to fan outward (deterministic)
                 mushroom.rotation.y = clusterAngle + Math.PI * 0.5;
-                mushroom.rotation.x = -0.3 - Math.random() * 0.3;
-                mushroom.rotation.z = (Math.random() - 0.5) * 0.2;
+                mushroom.rotation.x = -0.3 - seededRandom(mushroomSeed + 5) * 0.3;
+                mushroom.rotation.z = (seededRandom(mushroomSeed + 6) - 0.5) * 0.2;
 
                 cluster.add(mushroom);
             }
@@ -1048,20 +1889,61 @@
             return cluster;
         }
 
-        function update3DViz(data) {
-            if (!tentGroup) return;
+        // Determine mushroom visibility based on current day for a species
+        function getMushroomVisibility(currentDay, speciesId) {
+            const stages = getStagesForSpecies(speciesId);
+            const stage = getStageForDay(currentDay, stages);
+            const isVisible = ['pinning', 'harvest', 'secondPinning', 'secondHarvest'].includes(stage);
 
-            while (tentGroup.children.length > 0) {
-                tentGroup.remove(tentGroup.children[0]);
+            // Linear growth from start of pinning to end of harvest (first flush)
+            // Or from start of secondPinning to end of secondHarvest (second flush)
+            let progress = 0;
+            if (stage === 'pinning' || stage === 'harvest') {
+                // First flush: linear from pinning start to harvest end
+                const flushStart = stages.pinning.start;
+                const flushEnd = stages.harvest.end;
+                const flushDuration = flushEnd - flushStart;
+                progress = flushDuration > 0 ? Math.min(1, (currentDay - flushStart) / flushDuration) : 0;
+            } else if (stage === 'secondPinning' || stage === 'secondHarvest') {
+                // Second flush: linear from secondPinning start to secondHarvest end
+                const flushStart = stages.secondPinning.start;
+                const flushEnd = stages.secondHarvest.end;
+                const flushDuration = flushEnd - flushStart;
+                progress = flushDuration > 0 ? Math.min(1, (currentDay - flushStart) / flushDuration) : 0;
             }
 
-            const { tent, config, blocksNeeded, blocksPerTent, numTents } = data;
-            const block = BLOCK_DIMS[currentBlockSize];
+            return {
+                visible: isVisible,
+                stage: stage,
+                progress: progress
+            };
+        }
 
-            // Scale: 1 unit = 1 foot for the visualization
-            const w = tent.w;
-            const d = tent.d;
-            const h = tent.h;
+        function update3DViz(data) {
+            if (!tentGroup || !staticSceneGroup || !mushroomGroup) return;
+
+            // Dispose and clear only the static scene group (tents/shelves/blocks)
+            while (staticSceneGroup.children.length > 0) {
+                const child = staticSceneGroup.children[0];
+                disposeObject(child);
+                staticSceneGroup.remove(child);
+            }
+
+            // Clear block metadata for fresh rebuild
+            blockMetadata = [];
+
+            const block = BLOCK_DIMS[currentBlockSize];
+            const numTents = tentGroups.length;
+
+            if (numTents === 0) {
+                // Also clear mushrooms if no tents
+                while (mushroomGroup.children.length > 0) {
+                    const child = mushroomGroup.children[0];
+                    disposeObject(child);
+                    mushroomGroup.remove(child);
+                }
+                return;
+            }
 
             // Block dimensions in feet
             const blockW = block.w / 12;
@@ -1077,45 +1959,74 @@
             const wallMat = new THREE.MeshBasicMaterial({ color: 0xd9bf90, transparent: true, opacity: 0.08, side: THREE.DoubleSide });
             const legMat = new THREE.MeshBasicMaterial({ color: 0x666666 });
 
-            // Pre-create geometries (reuse for all blocks/tents)
+            // Pre-create geometries
             const blockGeometry = createSubstrateBlock(blockW, blockH, blockD);
-            const tentGeom = new THREE.BoxGeometry(w, h, d);
-            const tentEdges = new THREE.EdgesGeometry(tentGeom);
             const legGeom = new THREE.CylinderGeometry(0.02, 0.02, shelfBottomFt);
 
             // Calculate tent positions (side by side with gap)
-            const tentGap = 1.5; // feet between tents
-            const totalWidth = numTents > 1 ? (w * 2 + tentGap) : w;
-            const tentOffsets = numTents > 1
-                ? [-(w + tentGap) / 2, (w + tentGap) / 2]
-                : [0];
+            const tentGap = 1.5;
+            let totalWidth = 0;
+            let maxDepth = 0;
+            let maxHeight = 0;
+            const tentPositions = [];
 
-            // Render each tent
-            tentOffsets.forEach((xOffset, tentIndex) => {
+            // Calculate positions for all tents
+            let currentX = 0;
+            tentGroups.forEach((tg, idx) => {
+                const w = tg.tent.w;
+                const d = tg.tent.d;
+                const h = tg.tent.h;
+                maxDepth = Math.max(maxDepth, d);
+                maxHeight = Math.max(maxHeight, h);
+                tentPositions.push(currentX + w / 2);
+                currentX += w + tentGap;
+            });
+            totalWidth = currentX - tentGap;
+
+            // Center all tents
+            const offsetX = -totalWidth / 2;
+            tentPositions.forEach((pos, idx) => {
+                tentPositions[idx] = pos + offsetX;
+            });
+
+            // Render each tent from tentGroups - STATIC elements only
+            let totalBlocksRendered = 0;
+
+            tentGroups.forEach((tg, tentIndex) => {
+                const { tent, config, blocks: blocksForThisTent, species: speciesIds, tempGroup } = tg;
+
+                // Calculate blocks per species for grouping (instead of interleaving)
+                const blocksPerSpecies = Math.ceil(blocksForThisTent / speciesIds.length);
+                const w = tent.w;
+                const d = tent.d;
+                const h = tent.h;
+                const xOffset = tentPositions[tentIndex];
+
+                // Create tent geometry
+                const tentGeom = new THREE.BoxGeometry(w, h, d);
+                const tentEdges = new THREE.EdgesGeometry(tentGeom);
+
                 // Tent wireframe
-                const tentLine = new THREE.LineSegments(tentEdges.clone(), new THREE.LineBasicMaterial({ color: 0xd9bf90, linewidth: 2 }));
+                const tentLine = new THREE.LineSegments(tentEdges, new THREE.LineBasicMaterial({ color: 0xd9bf90, linewidth: 2 }));
                 tentLine.position.set(xOffset, h / 2, 0);
-                tentGroup.add(tentLine);
+                staticSceneGroup.add(tentLine);
 
                 // Semi-transparent walls
                 const walls = new THREE.Mesh(tentGeom.clone(), wallMat);
                 walls.position.set(xOffset, h / 2, 0);
-                tentGroup.add(walls);
+                staticSceneGroup.add(walls);
 
-                // Dimension labels (only for first tent or single tent)
-                if (tentIndex === 0 || numTents === 1) {
-                    tentGroup.add(createTextSprite(`${tent.w}'`, new THREE.Vector3(xOffset, -0.3, d/2 + 0.3)));
-                    tentGroup.add(createTextSprite(`${tent.d}'`, new THREE.Vector3(xOffset + w/2 + 0.3, -0.3, 0)));
-                    tentGroup.add(createTextSprite(`${tent.h}'`, new THREE.Vector3(xOffset + w/2 + 0.3, h/2, -d/2 - 0.2)));
+                // Dimension labels (only for first tent)
+                if (tentIndex === 0) {
+                    staticSceneGroup.add(createTextSprite(`${tent.w}'`, new THREE.Vector3(xOffset, -0.3, d/2 + 0.3)));
+                    staticSceneGroup.add(createTextSprite(`${tent.d}'`, new THREE.Vector3(xOffset + w/2 + 0.3, -0.3, 0)));
+                    staticSceneGroup.add(createTextSprite(`${tent.h}'`, new THREE.Vector3(xOffset + w/2 + 0.3, h/2, -d/2 - 0.2)));
                 }
 
-                // Tent label for dual tents
-                if (numTents > 1) {
-                    tentGroup.add(createTextSprite(`Tent ${tentIndex + 1}`, new THREE.Vector3(xOffset, h + 0.3, 0), 0.2));
-                }
+                // Tent label showing tent number
+                staticSceneGroup.add(createTextSprite(`Tent ${tentIndex + 1}`, new THREE.Vector3(xOffset, h + 0.3, 0), 0.2));
 
                 let blocksPlaced = 0;
-                const blocksForThisTent = blocksPerTent;
 
                 config.shelves.forEach(shelf => {
                     const shelfW = shelf.w / 12;
@@ -1126,64 +2037,51 @@
                     for (let level = 0; level < config.numLevels; level++) {
                         const shelfY = shelfBottomFt + level * shelfSpacingFt;
 
-                        // Draw shelf (thin box)
+                        // Draw shelf
                         const shelfGeom = new THREE.BoxGeometry(shelfW, 0.02, shelfD);
                         const shelfMesh = new THREE.Mesh(shelfGeom, shelfMat);
                         shelfMesh.position.set(shelfX, shelfY, shelfZ);
-                        tentGroup.add(shelfMesh);
+                        staticSceneGroup.add(shelfMesh);
 
                         // Draw shelf supports (4 legs)
                         if (level === 0) {
                             [[1,1], [1,-1], [-1,1], [-1,-1]].forEach(([sx, sz]) => {
                                 const leg = new THREE.Mesh(legGeom.clone(), legMat);
                                 leg.position.set(shelfX + sx * (shelfW/2 - 0.05), shelfBottomFt/2, shelfZ + sz * (shelfD/2 - 0.05));
-                                tentGroup.add(leg);
+                                staticSceneGroup.add(leg);
                             });
                         }
 
-                        // Place blocks on this shelf
+                        // Place blocks on this shelf and store metadata for mushroom updates
                         for (let row = 0; row < shelf.blocksDeep && blocksPlaced < blocksForThisTent; row++) {
                             for (let col = 0; col < shelf.blocksWide && blocksPlaced < blocksForThisTent; col++) {
-                                // Determine if this block should be shown and if it should have mushrooms
-                                // based on current week (staggered batch system)
-                                const blockIndex = blocksPlaced;
-                                const halfPoint = Math.ceil(blocksForThisTent / 2);
-                                const isFirstHalf = blockIndex < halfPoint;
+                                // Assign species to this block (grouped by species, not interleaved)
+                                const speciesIndex = Math.min(Math.floor(blocksPlaced / blocksPerSpecies), speciesIds.length - 1);
+                                const speciesId = speciesIds[speciesIndex];
 
-                                let showBlock = false;
-                                let showMushrooms = false;
+                                // Always show block
+                                const blockMesh = new THREE.Mesh(blockGeometry, blockMat);
 
-                                if (currentWeek === 1) {
-                                    showBlock = isFirstHalf;
-                                    showMushrooms = false;
-                                } else if (currentWeek === 2) {
-                                    showBlock = true;
-                                    showMushrooms = isFirstHalf;
-                                } else {
-                                    showBlock = true;
-                                    showMushrooms = !isFirstHalf;
-                                }
+                                const bx = shelfX - shelfW/2 + (blockW + spacing)/2 + col * (blockW + spacing);
+                                const bz = shelfZ - shelfD/2 + (blockD + spacing)/2 + row * (blockD + spacing);
+                                const by = shelfY + blockH/2 + 0.02;
 
-                                if (showBlock) {
-                                    const blockMesh = new THREE.Mesh(blockGeometry, blockMat);
+                                blockMesh.position.set(bx, by, bz);
+                                staticSceneGroup.add(blockMesh);
+                                totalBlocksRendered++;
 
-                                    const bx = shelfX - shelfW/2 + (blockW + spacing)/2 + col * (blockW + spacing);
-                                    const bz = shelfZ - shelfD/2 + (blockD + spacing)/2 + row * (blockD + spacing);
-                                    const by = shelfY + blockH/2 + 0.02;
-
-                                    blockMesh.position.set(bx, by, bz);
-                                    tentGroup.add(blockMesh);
-
-                                    if (showMushrooms) {
-                                        const facing = shelf.facing || 0;
-                                        const mushrooms = createMushroomCluster(blockW, blockH, blockD, facing);
-                                        const mushroomOffset = blockD / 2 + 0.02;
-                                        const mx = bx - Math.sin(facing) * mushroomOffset;
-                                        const mz = bz + Math.cos(facing) * mushroomOffset;
-                                        mushrooms.position.set(mx, by - blockH * 0.1, mz);
-                                        tentGroup.add(mushrooms);
-                                    }
-                                }
+                                // Store block metadata for mushroom visibility updates
+                                const facing = shelf.facing || 0;
+                                blockMetadata.push({
+                                    position: { x: bx, y: by, z: bz },
+                                    speciesId: speciesId,
+                                    facing: facing,
+                                    seed: totalBlocksRendered,
+                                    tempGroup: tempGroup,
+                                    blockW: blockW,
+                                    blockH: blockH,
+                                    blockD: blockD
+                                });
 
                                 blocksPlaced++;
                             }
@@ -1192,39 +2090,282 @@
                 });
             });
 
-            // Floor grid (spans all tents)
-            const gridSize = Math.max(totalWidth, d) * 1.2;
+            // Floor grid
+            const gridSize = Math.max(totalWidth, maxDepth) * 1.2;
             const gridHelper = new THREE.GridHelper(gridSize, Math.round(gridSize * 2), 0x444444, 0x333333);
             gridHelper.position.y = 0.001;
-            tentGroup.add(gridHelper);
+            staticSceneGroup.add(gridHelper);
 
-            // Adjust camera for dual tents
-            const maxDim = Math.max(totalWidth, d, h);
-            const cameraDistance = numTents > 1 ? maxDim * 1.1 : maxDim * 1.3;
-            camera.position.set(cameraDistance, maxDim * 0.9, cameraDistance * 1.1);
-            camera.lookAt(0, h * 0.35, 0);
+            // Adjust camera - store base values for zoom calculations
+            const maxDim = Math.max(totalWidth, maxDepth, maxHeight);
+            baseCameraDistance = numTents > 1 ? maxDim * 1.1 : maxDim * 1.3;
+            baseCameraY = maxDim * 0.9;
+            cameraLookAtY = maxHeight * 0.35;
 
-            // Update stats based on week
-            const halfPoint = Math.ceil(blocksPerTent / 2);
-            let visibleBlocksPerTent, fruitingBlocksPerTent;
-            if (currentWeek === 1) {
-                visibleBlocksPerTent = halfPoint;
-                fruitingBlocksPerTent = 0;
-            } else if (currentWeek === 2) {
-                visibleBlocksPerTent = blocksPerTent;
-                fruitingBlocksPerTent = halfPoint;
-            } else {
-                visibleBlocksPerTent = blocksPerTent;
-                fruitingBlocksPerTent = blocksPerTent - halfPoint;
+            // Reset zoom when scene changes significantly, then apply
+            currentZoom = MAX_ZOOM;
+            applyZoom();
+
+            // Update legend to show selected species with their colors
+            updateVizLegend();
+
+            // Now update mushrooms based on current day (uses blockMetadata)
+            updateMushroomVisibility();
+        }
+
+        // Update the 3D visualization legend to show selected species colors
+        function updateVizLegend() {
+            const legendEl = document.querySelector('.viz-legend');
+            if (!legendEl) return;
+
+            // Build legend HTML
+            let html = `
+                <div class="viz-legend-item">
+                    <div class="viz-legend-color" style="background: #d9bf90;"></div>
+                    <span>Tent</span>
+                </div>
+                <div class="viz-legend-item">
+                    <div class="viz-legend-color" style="background: #888;"></div>
+                    <span>Shelving</span>
+                </div>
+                <div class="viz-legend-item">
+                    <div class="viz-legend-color" style="background: #f5f5f5;"></div>
+                    <span>Blocks</span>
+                </div>
+            `;
+
+            // Add selected species to legend
+            selectedSpecies.forEach(speciesId => {
+                const speciesData = SPECIES_DATA[speciesId];
+                if (speciesData) {
+                    const colorHex = '#' + speciesData.color.cap.toString(16).padStart(6, '0');
+                    html += `
+                        <div class="viz-legend-item">
+                            <div class="viz-legend-color" style="background: ${colorHex};"></div>
+                            <span>${speciesData.name}</span>
+                        </div>
+                    `;
+                }
+            });
+
+            legendEl.innerHTML = html;
+        }
+
+        // ============================================================
+        // DAY SLIDER GENERATION
+        // ============================================================
+
+        function generateDaySliders() {
+            const container = document.getElementById('day-sliders');
+            if (!container) return;
+
+            if (tentGroups.length === 0) {
+                container.innerHTML = '';
+                return;
             }
 
-            if (numTents > 1) {
-                document.getElementById('viz-stats').textContent =
-                    `Week ${currentWeek}: ${visibleBlocksPerTent * numTents} blocks (${visibleBlocksPerTent}/tent), ${fruitingBlocksPerTent * numTents} fruiting`;
-            } else {
-                document.getElementById('viz-stats').textContent =
-                    `Week ${currentWeek}: ${visibleBlocksPerTent} blocks, ${fruitingBlocksPerTent} fruiting`;
-            }
+            // Group tentGroups by temp
+            const groupedByTemp = {};
+            tentGroups.forEach(tg => {
+                if (!groupedByTemp[tg.tempGroup]) {
+                    groupedByTemp[tg.tempGroup] = [];
+                }
+                groupedByTemp[tg.tempGroup].push(tg);
+            });
+
+            let html = '';
+            let tentNumber = 1;
+
+            Object.keys(groupedByTemp).forEach(tempGroup => {
+                const tents = groupedByTemp[tempGroup];
+                const allSpecies = [...new Set(tents.flatMap(t => t.species))];
+                const cycleLength = calculateCycleLength(allSpecies);
+                const currentDay = Math.min(currentDays[tempGroup] || 0, cycleLength);
+
+                // Dynamic label based on split mode
+                let tempLabel, tempBadgeClass;
+                if (currentSplitMode === 'none') {
+                    tempLabel = 'Mixed';
+                    tempBadgeClass = 'warm';
+                } else if (currentSplitMode === 'temperature') {
+                    tempLabel = tempGroup === 'cold' ? 'Cold' : 'Warm';
+                    tempBadgeClass = tempGroup === 'cold' ? 'cold' : 'warm';
+                } else if (currentSplitMode === 'duration') {
+                    tempLabel = tempGroup === 'short' ? 'Short Cycle' : 'Long Cycle';
+                    tempBadgeClass = tempGroup === 'short' ? 'cold' : 'warm';
+                } else {
+                    tempLabel = tempGroup === 'cold' ? 'Cold' : 'Warm';
+                    tempBadgeClass = tempGroup === 'cold' ? 'cold' : 'warm';
+                }
+
+                html += `
+                    <div class="day-slider-group" data-temp-group="${tempGroup}">
+                        <div class="day-slider-header">
+                            <div class="day-slider-label">
+                                <strong>Tent ${tentNumber}</strong>
+                                <span class="temp-badge ${tempBadgeClass}">${tempLabel}</span>
+                            </div>
+                            <div class="current-day-display">Day ${currentDay}</div>
+                        </div>
+                        <div class="tent-timeline-container">
+                            <div class="timeline-species-labels">
+                                ${allSpecies.map(speciesId => {
+                                    const speciesData = SPECIES_DATA[speciesId];
+                                    if (!speciesData) return '';
+                                    const colorHex = '#' + speciesData.color.cap.toString(16).padStart(6, '0');
+                                    return `<div class="batch-chart-species-label">
+                                        <span class="species-color-dot" style="background: ${colorHex};"></span>
+                                        ${speciesData.name}
+                                    </div>`;
+                                }).join('')}
+                            </div>
+                            <div class="timeline-grid-area">
+                                <div class="day-slider-track">
+                                    <input type="range" class="day-slider" data-temp-group="${tempGroup}"
+                                        min="0" max="${cycleLength}" value="${currentDay}">
+                                </div>
+                                ${allSpecies.map(speciesId => {
+                                    const speciesData = SPECIES_DATA[speciesId];
+                                    if (!speciesData) return '';
+                                    const stages = getStagesForSpecies(speciesId);
+                                    let cellsHtml = '';
+                                    for (let d = 0; d < cycleLength; d++) {
+                                        let cellColor, title;
+                                        if (d < stages.reset.start) {
+                                            const stage = getStageForDay(d, stages);
+                                            const stageColors = {
+                                                'starting': BATCH_STAGES.STARTING.color,
+                                                'pinning': BATCH_STAGES.PINNING.color,
+                                                'harvest': BATCH_STAGES.HARVEST.color,
+                                                'rest': BATCH_STAGES.REST.color,
+                                                'secondPinning': BATCH_STAGES.SECOND_PINNING.color,
+                                                'secondHarvest': BATCH_STAGES.SECOND_HARVEST.color
+                                            };
+                                            cellColor = stageColors[stage] || BATCH_STAGES.STARTING.color;
+                                            title = 'Day ' + d + ': ' + stage;
+                                        } else if (d === stages.reset.start) {
+                                            cellColor = BATCH_STAGES.RESET.color;
+                                            title = 'Day ' + d + ': Reset';
+                                        } else {
+                                            cellColor = BATCH_STAGES.NEXT_BATCH.color;
+                                            title = 'Day ' + d + ': Next Batch';
+                                        }
+                                        cellsHtml += '<div class="batch-chart-cell" style="background: ' + cellColor + ';" title="' + title + '"></div>';
+                                    }
+                                    return '<div class="batch-chart-cells" data-temp-group="' + tempGroup + '" data-cycle-length="' + cycleLength + '">' + cellsHtml +
+                                        '<div class="day-indicator" style="left: ' + (currentDay / cycleLength * 100) + '%;"></div></div>';
+                                }).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                tentNumber++;
+            });
+
+            // Add legend at the end
+            const uniqueStages = [
+                { name: 'Starting', color: BATCH_STAGES.STARTING.color },
+                { name: 'Pinning', color: BATCH_STAGES.PINNING.color },
+                { name: 'Harvest', color: BATCH_STAGES.HARVEST.color },
+                { name: 'Rest', color: BATCH_STAGES.REST.color },
+                { name: 'Reset', color: BATCH_STAGES.RESET.color },
+                { name: 'Next', color: BATCH_STAGES.NEXT_BATCH.color }
+            ];
+            html += `<div class="chart-legend">
+                ${uniqueStages.map(stage =>
+                    '<span><span class="legend-color" style="background: ' + stage.color + ';"></span>' + stage.name + '</span>'
+                ).join('')}
+            </div>`;
+
+            container.innerHTML = html;
+
+            // Add event listeners to sliders
+            container.querySelectorAll('.day-slider').forEach(slider => {
+                slider.addEventListener('input', (e) => {
+                    const tempGroup = e.target.dataset.tempGroup;
+                    const day = parseInt(e.target.value);
+                    const maxDay = parseInt(e.target.max);
+                    currentDays[tempGroup] = day;
+
+                    // Update day display
+                    const group = e.target.closest('.day-slider-group');
+                    group.querySelector('.current-day-display').textContent = `Day ${day}`;
+
+                    // Update day indicators in the timeline using the cycle length from data attribute
+                    group.querySelectorAll('.batch-chart-cells').forEach(cells => {
+                        const cycleLen = parseInt(cells.dataset.cycleLength) || maxDay;
+                        const indicator = cells.querySelector('.day-indicator');
+                        if (indicator) {
+                            indicator.style.left = (day / cycleLen * 100) + '%';
+                        }
+                    });
+
+                    // Update mushroom visibility only - FAST path (no full scene rebuild)
+                    updateMushroomVisibility();
+                });
+            });
+        }
+
+        // ============================================================
+        // SPECIES TENT BADGE UPDATE
+        // ============================================================
+
+        function updateSpeciesTentBadges() {
+            // Build a map of species -> tent number
+            const speciesTentMap = {};
+            let tentNumber = 1;
+
+            // Group by temp to determine tent numbers
+            const tempGroups = {};
+            tentGroups.forEach(tg => {
+                if (!tempGroups[tg.tempGroup]) {
+                    tempGroups[tg.tempGroup] = { tentNum: tentNumber++, species: new Set() };
+                }
+                tg.species.forEach(s => tempGroups[tg.tempGroup].species.add(s));
+            });
+
+            // Map species to their tent
+            Object.values(tempGroups).forEach(group => {
+                group.species.forEach(speciesId => {
+                    speciesTentMap[speciesId] = group.tentNum;
+                });
+            });
+
+            // Update all badge elements
+            document.querySelectorAll('.species-tile').forEach(tile => {
+                const speciesId = tile.dataset.species;
+                const badge = tile.querySelector('.species-tent-badge');
+                if (badge && speciesTentMap[speciesId]) {
+                    badge.textContent = `Tent ${speciesTentMap[speciesId]}`;
+                }
+            });
+        }
+
+        // Update group badges on species cards based on split mode
+        function updateSpeciesGroupBadges() {
+            document.querySelectorAll('.species-tile').forEach(tile => {
+                const speciesId = tile.dataset.species;
+                const badge = tile.querySelector('.species-group-badge');
+                if (!badge || !SPECIES_DATA[speciesId]) return;
+
+                // Clear existing classes
+                badge.className = 'species-group-badge';
+                badge.textContent = '';
+
+                if (currentSplitMode === 'none') {
+                    // No grouping indicator
+                    return;
+                } else if (currentSplitMode === 'temperature') {
+                    const tempGroup = SPECIES_DATA[speciesId].tempGroup;
+                    badge.classList.add(tempGroup);
+                    badge.textContent = tempGroup === 'cold' ? 'Cool' : 'Warm';
+                } else if (currentSplitMode === 'duration') {
+                    const cycleLen = getSpeciesCycleLength(speciesId);
+                    const isLong = cycleLen >= 50;
+                    badge.classList.add(isLong ? 'long' : 'short');
+                    badge.textContent = isLong ? 'Long' : 'Short';
+                }
+            });
         }
 
         // ============================================================
@@ -1236,38 +2377,41 @@
             const beDecimal = currentBE / 100;
 
             const yieldPerBlock = block.weight_kg * DRY_MASS_RATIO * beDecimal;
-            const totalCycleYield = currentYield * CYCLE_WEEKS;
+            // currentYield is now monthly (kg/month), which equals one 4-week cycle
+            const totalCycleYield = currentYield;
+            const weeklyYield = currentYield / CYCLE_WEEKS;  // For display
             const blocksNeeded = yieldPerBlock > 0 ? Math.ceil(totalCycleYield / yieldPerBlock) : 0;
             const prodWeekYield = blocksNeeded > 0 ? (blocksNeeded * yieldPerBlock) / PRODUCTION_WEEKS : 0;
 
-            // Determine if we need dual tents based on:
-            // 1. 3+ species
-            // 2. Incompatible fruiting temperatures (cold vs warm species mixed)
-            const numSpecies = selectedSpecies.length;
+            // Use new multi-tent allocation
+            tentGroups = allocateTents(blocksNeeded, currentBlockSize, selectedSpecies);
 
-            // Check temperature compatibility
-            const speciesTiles = document.querySelectorAll('.species-tile.selected');
-            let hasCold = false, hasWarm = false;
-            speciesTiles.forEach(tile => {
-                const temp = tile.dataset.fruitTemp;
-                if (temp === 'cold') hasCold = true;
-                if (temp === 'warm') hasWarm = true;
+            // Initialize currentDays for any new temp groups
+            const tempGroupsInUse = [...new Set(tentGroups.map(tg => tg.tempGroup))];
+            tempGroupsInUse.forEach(tg => {
+                if (currentDays[tg] === undefined) {
+                    currentDays[tg] = 0;
+                }
             });
+
+            // Check temperature compatibility for display
+            const hasCold = selectedSpecies.some(id => SPECIES_DATA[id]?.tempGroup === 'cold');
+            const hasWarm = selectedSpecies.some(id => SPECIES_DATA[id]?.tempGroup === 'warm');
             const incompatibleTemps = hasCold && hasWarm;
 
-            // Need 2 tents if 3+ species OR incompatible temperatures
-            const numTents = (numSpecies >= 3 || incompatibleTemps) ? 2 : 1;
-            const blocksPerTent = Math.ceil(blocksNeeded / numTents);
+            // Calculate totals across all tents
+            const numTents = tentGroups.length;
+            const totalBlocks = tentGroups.reduce((sum, tg) => sum + tg.blocks, 0);
 
-            // Find best tent based on blocks per tent
-            const { tent, config } = findBestTent(blocksPerTent, currentBlockSize);
+            // Use first tent's dimensions for primary display (or largest)
+            const primaryTent = tentGroups.length > 0 ? tentGroups[0] : null;
+            const tent = primaryTent?.tent || TENT_SIZES[0];
+            const config = primaryTent?.config || calculateTentCapacity(tent, currentBlockSize);
 
-            // FAE calculation - exchange rate scales with tent size
-            // Small: 4-6/hr, Medium: 6-8/hr, Large: 8-12/hr
+            // FAE calculation based on primary tent
             const ft3 = tent.w * tent.d * tent.h;
             const m3 = ft3 * 0.0283168;
 
-            // Scale air exchanges: more volume = higher rate needed for CO2 removal
             let exchangesPerHour;
             if (ft3 <= 40) exchangesPerHour = 5;
             else if (ft3 <= 120) exchangesPerHour = 6;
@@ -1275,10 +2419,9 @@
             else if (ft3 <= 400) exchangesPerHour = 10;
             else exchangesPerHour = 12;
 
-            const targetCfm = (ft3 * exchangesPerHour) / 60;  // Actual airflow needed
-            const fanRatedCfm = targetCfm * DUCT_LOSS_FACTOR;  // Fan rating to achieve target with ducting
+            const targetCfm = (ft3 * exchangesPerHour) / 60;
+            const fanRatedCfm = targetCfm * DUCT_LOSS_FACTOR;
 
-            // Moisture/fogger (based on actual airflow, not fan rating)
             const exhaustM3PerHour = (targetCfm * 60) * 0.0283168;
             const moistureLossGPerHour = exhaustM3PerHour * MOISTURE_CONTENT_85RH;
             const fogger = FOGGERS.find(f => (moistureLossGPerHour / f.output) * 100 <= 50) || FOGGERS[FOGGERS.length - 1];
@@ -1288,8 +2431,6 @@
             const discLifeMonthsMin = Math.round((DISC_LIFE_HOURS_MIN / runHoursPerDay) / 30);
             const discLifeMonthsMax = Math.round((DISC_LIFE_HOURS_MAX / runHoursPerDay) / 30);
 
-            // Fan recommendation based on rated CFM needed (accounting for duct losses)
-            // 80mm PC: ~25 CFM rated, 120mm: ~50 CFM, 4" inline: ~200 CFM, 6" inline: ~400 CFM, 8" inline: ~700 CFM
             let fanRec, fanSize;
             if (fanRatedCfm <= 25) {
                 fanRec = "80mm PC fan"; fanSize = "80mm";
@@ -1305,23 +2446,27 @@
                 fanRec = '8" inline fan'; fanSize = '8"';
             }
 
+            const blocksPerTent = primaryTent?.blocks || blocksNeeded;
+
             const calcData = {
                 block, yieldPerBlock, blocksNeeded, blocksPerTent, prodWeekYield,
                 tent, config, ft3, m3, numTents, incompatibleTemps,
                 exchangesPerHour, targetCfm, fanRatedCfm, fanRec, fanSize,
                 fogger, dutyCycle, discLifeMonthsMin, discLifeMonthsMax,
-                runHoursPerDay
+                runHoursPerDay, tentGroups, moistureLossGPerHour
             };
 
             currentCalcData = calcData;
+            updateSpeciesTentBadges();
             updateDisplay(calcData);
+            generateDaySliders();
             update3DViz(calcData);
         }
 
         function updateDisplay(data) {
             const { block, yieldPerBlock, blocksNeeded, blocksPerTent, prodWeekYield, tent, config, ft3, m3, numTents, incompatibleTemps,
                     exchangesPerHour, targetCfm, fanRatedCfm, fanRec, fanSize,
-                    fogger, dutyCycle, discLifeMonthsMin, discLifeMonthsMax, runHoursPerDay } = data;
+                    fogger, dutyCycle, discLifeMonthsMin, discLifeMonthsMax, runHoursPerDay, moistureLossGPerHour } = data;
 
             const isMetric = currentUnit === 'metric';
             const numSpecies = selectedSpecies.length;
@@ -1371,13 +2516,12 @@
                 tentDimsMetric.textContent = isMetric ? '' : `(${(tent.w * FT_TO_M).toFixed(1)}m × ${(tent.d * FT_TO_M).toFixed(1)}m × ${(tent.h * FT_TO_M).toFixed(1)}m)`;
             }
 
-            // Display yield in current unit
+            // Display yield in current unit (monthly)
             const displayYield = isMetric ? currentYield : currentYield * KG_TO_LB;
-            const yieldUnit = isMetric ? 'kg/week avg' : 'lb/week avg';
+            const yieldUnit = isMetric ? 'kg/month' : 'lb/month';
             document.getElementById('yield-unit').textContent = yieldUnit;
 
-            document.getElementById('target-display').textContent = `${formatWeight(currentYield)}/week avg`;
-            document.getElementById('cycle-info').textContent = `~${formatWeight(prodWeekYield)} weeks 1-3, week 4 cleaning`;
+            document.getElementById('target-display').textContent = `${formatWeight(currentYield)}/month avg`;
 
             document.getElementById('blocks-value').textContent = blocksNeeded;
             document.getElementById('blocks-detail').textContent = numTents > 1
@@ -1400,8 +2544,8 @@
                 ? `${numTents}× ~${Math.round(dutyCycle)}% duty`
                 : `~${Math.round(dutyCycle)}% duty cycle`;
 
-            // Spec sheet
-            document.getElementById('spec-target').textContent = `${formatWeight(currentYield)}/week`;
+            // Spec sheet - Properties section
+            document.getElementById('spec-target').textContent = `${formatWeight(currentYield)}/month`;
             document.getElementById('spec-species').textContent = numSpecies;
             document.getElementById('spec-prod-weeks').textContent = `~${formatWeight(prodWeekYield)}/wk for 3 weeks`;
 
@@ -1410,82 +2554,142 @@
             document.getElementById('spec-block-size').textContent = `${blockLabel} (${formatBlockDims(block)})`;
             document.getElementById('spec-be').textContent = `${currentBE}%`;
             document.getElementById('spec-yield-block').textContent = formatWeightShort(yieldPerBlock);
+            document.getElementById('spec-blocks').textContent = numTents > 1 ? `${blocksNeeded} total (${blocksPerTent}/tent)` : blocksNeeded;
 
-            // Blocks with quantity
-            document.getElementById('spec-blocks').textContent = numTents > 1 ? `${blocksPerTent} per tent` : blocksNeeded;
-            document.getElementById('spec-blocks-qty').textContent = numTents > 1 ? `×${numTents}` : '';
+            // Temperature display
+            const tempDisplay = isMetric ? '18-21°C' : '65-70°F';
+            document.getElementById('spec-temp').textContent = tempDisplay;
 
-            // Chamber with quantity
-            document.getElementById('spec-chamber').textContent = `${formatTentDims(tent)} (${formatVolume(ft3)})`;
-            document.getElementById('spec-chamber-qty').textContent = numTents > 1 ? `×${numTents}` : '';
+            // Supplies section with costs (CAD, Jan 2026 pricing)
+            const tentCosts = { '2x2': 110, '2x4': 150, '4x4': 200, '10x10': 400 };
+            const fanCosts = { '80mm': 30, '4"': 160, '6"': 200 };
+            const fanCfm = { '80mm': 30, '4"': 205, '6"': 402 };
+            const rackCost = 60;
+            const controllerCost = 60; // Inkbird IHC-200
 
-            const utilizationPct = Math.round((blocksPerTent / config.capacity) * 100);
-            document.getElementById('spec-capacity').textContent = `${config.capacity} blocks (${utilizationPct}% used)`;
+            const tentKey = `${tent.w}x${tent.d}`;
+            const tentUnitCost = tentCosts[tentKey] || 150;
+            const tentTotalCost = tentUnitCost * numTents;
 
             const numRacks = config.shelves.length;
-            document.getElementById('spec-shelving').textContent = `${numRacks}× rack${numRacks > 1 ? 's' : ''}, ${config.numLevels} levels`;
-            document.getElementById('spec-shelving-qty').textContent = numTents > 1 ? `×${numTents}` : '';
+            const totalRacks = numRacks * numTents;
+            const shelvingTotalCost = totalRacks * rackCost;
 
-            document.getElementById('spec-fae').textContent = `${exchangesPerHour} exch/hr → ${Math.round(targetCfm)} CFM target`;
-            document.getElementById('spec-fan').textContent = `${fanRec} (~${Math.round(fanRatedCfm)} CFM rated)`;
-            document.getElementById('spec-fan-qty').textContent = numTents > 1 ? `×${numTents}` : '';
+            const fanKey = fanRec.includes('80mm') ? '80mm' : (fanRec.includes('6"') ? '6"' : '4"');
+            const fanUnitCost = fanCosts[fanKey] || 160;
+            const fanTotalCost = fanUnitCost * numTents;
+            const cfm = fanCfm[fanKey] || 205;
 
-            document.getElementById('spec-humidity-qty').textContent = numTents > 1 ? `×${numTents}` : '';
+            const controllerTotalCost = controllerCost * numTents;
 
-            document.getElementById('spec-fogger').textContent = `${fogger.fullName}`;
-            document.getElementById('spec-fogger-qty').textContent = numTents > 1 ? `×${numTents}` : '';
+            // Use fogger price directly from FOGGERS table
+            const foggerUnitCost = fogger.priceCAD;
+            const foggerTotalCost = foggerUnitCost * numTents;
 
-            document.getElementById('spec-duty').textContent = `~${Math.round(dutyCycle)}% (${runHoursPerDay.toFixed(1)} hrs/day)`;
+            const grandTotal = tentTotalCost + shelvingTotalCost + fanTotalCost + controllerTotalCost + foggerTotalCost;
 
-            let discLifeText = discLifeMonthsMin >= 24
-                ? `${Math.round(discLifeMonthsMin/12)}-${Math.round(discLifeMonthsMax/12)} years`
-                : `${discLifeMonthsMin}-${discLifeMonthsMax} months`;
-            document.getElementById('spec-life').textContent = discLifeText;
+            // Update supplies display with details
+            const tentDims = `${tent.w}'×${tent.d}'×${tent.h}'`;
+            document.getElementById('supply-tent-label').textContent = `Grow tent (${tentDims})`;
+            document.getElementById('supply-tent-qty').textContent = numTents;
+            document.getElementById('supply-tent-cost').textContent = `$${tentTotalCost}`;
 
-            // Tips
-            const tipText = document.getElementById('tip-text');
-            const tipTitle = document.querySelector('.tip-title');
-            if (currentBE === 0) {
-                tipTitle.textContent = "Note";
-                tipText.textContent = "Set biological efficiency above 0% to calculate block requirements.";
-            } else if (yieldPerBlock < 0.1) {
-                tipTitle.textContent = "Note";
-                tipText.textContent = "Very low BE results in minimal yield per block.";
-            } else if (incompatibleTemps && numTents > 1) {
-                tipTitle.textContent = "Dual Chambers Required";
-                tipText.textContent = "Cold-fruiting species (10-16°C) and warm-fruiting species (15-18°C) need separate chambers. Harvest split equally between tents.";
-            } else if (numTents > 1) {
-                tipTitle.textContent = "Dual Chambers";
-                tipText.textContent = `${numSpecies} species split across ${numTents} chambers for isolation. Each tent runs independently with half the harvest target.`;
-            } else if (utilizationPct > 90) {
-                tipTitle.textContent = "High Utilization";
-                tipText.textContent = "Tent is nearly full. Good efficiency, but leave room for airflow between blocks.";
-            } else if (utilizationPct < 50 && blocksNeeded > 10) {
-                tipTitle.textContent = "Extra Capacity";
-                tipText.textContent = "Tent has extra capacity. Consider a smaller tent or plan for growth.";
-            } else if (config.needsWalkway) {
-                tipTitle.textContent = "Layout";
-                tipText.textContent = "Perimeter shelving layout with center walkway for access and harvesting.";
+            const rackLabel = numRacks > 1 ? `Metal shelving racks (${numRacks}/tent)` : 'Metal shelving rack';
+            document.getElementById('supply-shelving-label').textContent = rackLabel;
+            document.getElementById('supply-shelving-qty').textContent = totalRacks;
+            document.getElementById('supply-shelving-cost').textContent = `$${shelvingTotalCost}`;
+
+            document.getElementById('supply-fan-label').textContent = `Inline fan (${fanKey}, ${cfm} CFM)`;
+            document.getElementById('supply-fan-qty').textContent = numTents;
+            document.getElementById('supply-fan-cost').textContent = `$${fanTotalCost}`;
+
+            document.getElementById('supply-controller-label').textContent = 'Humidity controller - Inkbird IHC-200';
+            document.getElementById('supply-controller-qty').textContent = numTents;
+            document.getElementById('supply-controller-cost').textContent = `$${controllerTotalCost}`;
+
+            // Fogger with output info
+            const foggerOutputL = (fogger.output / 1000).toFixed(1);
+            document.getElementById('supply-fogger-label').textContent = `Fogger - House of Hydro ${fogger.discs}-disc (${foggerOutputL} L/hr)`;
+            document.getElementById('supply-fogger-qty').textContent = numTents;
+            document.getElementById('supply-fogger-cost').textContent = `$${foggerTotalCost}`;
+
+            document.getElementById('supply-total').textContent = `$${grandTotal} CAD`;
+
+            // Update Sizing Calculations section
+            updateSizingCalcs(blocksNeeded, blocksPerTent, numTents, tent, config, ft3, exchangesPerHour, targetCfm, fanRatedCfm, fanRec, moistureLossGPerHour, fogger, dutyCycle);
+        }
+
+        function updateSizingCalcs(blocksNeeded, blocksPerTent, numTents, tent, config, ft3, exchangesPerHour, targetCfm, fanRatedCfm, fanRec, moistureLossGPerHour, fogger, dutyCycle) {
+            const block = BLOCK_DIMS[currentBlockSize];
+            const isMetric = currentUnit === 'metric';
+
+            // Chamber calculation
+            const blockDims = isMetric
+                ? `${(block.w * 2.54).toFixed(0)}×${(block.d * 2.54).toFixed(0)}×${(block.h * 2.54).toFixed(0)} cm`
+                : `${block.w}×${block.d}×${block.h}"`;
+            const tentDims = `${tent.w}'×${tent.d}'×${tent.h}'`;
+            const tentDimsM = `${(tent.w * FT_TO_M).toFixed(1)}×${(tent.d * FT_TO_M).toFixed(1)}×${(tent.h * FT_TO_M).toFixed(1)}m`;
+            const volumeDisplay = isMetric ? `${(ft3 * 0.0283).toFixed(1)} m³` : `${ft3.toFixed(0)} ft³`;
+
+            let chamberCalc = `<strong>Blocks needed:</strong> ${blocksNeeded} blocks (${blockDims} each)\n`;
+            chamberCalc += `<strong>Shelving:</strong> ${config.shelves.length} rack(s) × ${config.numLevels} levels = ${config.capacity} block capacity\n`;
+            if (numTents > 1) {
+                chamberCalc += `<strong>Tent size:</strong> ${tentDims} (${tentDimsM}) × ${numTents} tents\n`;
+                chamberCalc += `<strong>Total volume:</strong> ${volumeDisplay} per tent`;
             } else {
-                tipTitle.textContent = "Batch Cycle";
-                tipText.textContent = "3 weeks production, 1 week cleaning/restart. Full clean between batches reduces contamination risk.";
+                chamberCalc += `<strong>Tent size:</strong> ${tentDims} (${tentDimsM})\n`;
+                chamberCalc += `<strong>Chamber volume:</strong> ${volumeDisplay}`;
             }
+            document.getElementById('calc-chamber').innerHTML = chamberCalc.replace(/\n/g, '<br>');
+
+            // FAE calculation
+            const totalVolume = ft3 * numTents;
+            const totalVolumeM3 = totalVolume * 0.0283;
+            let faeCalc = `<strong>Chamber volume:</strong> ${isMetric ? totalVolumeM3.toFixed(1) + ' m³' : totalVolume.toFixed(0) + ' ft³'}${numTents > 1 ? ' (total)' : ''}\n`;
+            faeCalc += `<strong>Target exchanges:</strong> ${exchangesPerHour} per hour\n`;
+            faeCalc += `<strong>Required airflow:</strong> ${isMetric ? (totalVolumeM3 * exchangesPerHour).toFixed(0) + ' m³/hr' : (ft3 * exchangesPerHour).toFixed(0) + ' ft³/hr'} = <span class="calc-result">${targetCfm.toFixed(1)} CFM</span>\n`;
+            faeCalc += `<strong>With duct losses (×2.5):</strong> ${(targetCfm * DUCT_LOSS_FACTOR).toFixed(0)} CFM needed\n`;
+            faeCalc += `<strong>Recommended fan:</strong> <span class="calc-result">${fanRec}</span> (~${Math.round(fanRatedCfm)} CFM rated)`;
+            document.getElementById('calc-fae').innerHTML = faeCalc.replace(/\n/g, '<br>');
+
+            // Fogger calculation
+            const moistureLossLPerHour = moistureLossGPerHour / 1000;
+            const moistureLossPerDay = moistureLossLPerHour * 24;
+            let foggerCalc = `<strong>Air exchanged per hour:</strong> ${(ft3 * exchangesPerHour).toFixed(0)} ft³ (${(ft3 * exchangesPerHour * 0.0283).toFixed(1)} m³)\n`;
+            foggerCalc += `<strong>Moisture lost per exchange:</strong> 6.1 g/m³ × ${(ft3 * 0.0283).toFixed(2)} m³ = ${(6.1 * ft3 * 0.0283).toFixed(0)} g\n`;
+            foggerCalc += `<strong>Moisture lost per hour:</strong> ${moistureLossGPerHour.toFixed(0)} g = <span class="calc-result">${moistureLossLPerHour.toFixed(2)} L/hr</span>\n`;
+            foggerCalc += `<strong>Daily water usage:</strong> ~${moistureLossPerDay.toFixed(1)} L/day\n\n`;
+            foggerCalc += `<strong>Fogger selected:</strong> <span class="calc-result">${fogger.fullName}</span> (${fogger.output} mL/hr output)\n`;
+            foggerCalc += `<strong>Duty cycle:</strong> ${moistureLossGPerHour.toFixed(0)} g needed ÷ ${fogger.output} mL capacity = <span class="calc-result">${dutyCycle.toFixed(0)}%</span>`;
+            document.getElementById('calc-fogger').innerHTML = foggerCalc.replace(/\n/g, '<br>');
         }
 
         function copySpecs() {
-            const specs = [];
-            document.querySelectorAll('.spec-row').forEach(row => {
+            let text = `FRUITING CHAMBER SPECS (BATCH MODE)\n${'='.repeat(40)}\n\n`;
+
+            // Properties section
+            text += 'PROPERTIES OF THE SYSTEM\n';
+            text += '-'.repeat(30) + '\n';
+            document.querySelectorAll('.spec-section:first-child .spec-row').forEach(row => {
                 const label = row.querySelector('.spec-label').textContent;
-                const qty = row.querySelector('.spec-qty')?.textContent || '';
                 const value = row.querySelector('.spec-value').textContent;
-                if (qty) {
-                    specs.push(`${label}: ${qty} ${value}`);
-                } else {
-                    specs.push(`${label}: ${value}`);
-                }
+                text += `${label}: ${value}\n`;
             });
 
-            const text = `FRUITING CHAMBER SPECS (BATCH MODE)\n${'='.repeat(40)}\n${specs.join('\n')}\n\nCalculated at growcalc.heartwoodmushrooms.ca`;
+            // Supplies section
+            text += '\nSUPPLIES\n';
+            text += '-'.repeat(30) + '\n';
+            document.querySelectorAll('#supplies-list .spec-row').forEach(row => {
+                const label = row.querySelector('.spec-label').textContent;
+                const qty = row.querySelector('.spec-qty')?.textContent || '';
+                const cost = row.querySelector('.spec-cost')?.textContent || '';
+                text += `${label}: ${qty}× ${cost}\n`;
+            });
+
+            // Total
+            const total = document.getElementById('supply-total').textContent;
+            text += `\nEstimated Total: ${total}\n`;
+            text += '\nCalculated at growcalc.heartwoodmushrooms.ca';
 
             navigator.clipboard.writeText(text).then(() => {
                 const btn = document.querySelector('.copy-btn');
@@ -1505,14 +2709,38 @@
         const sizeBtns = document.querySelectorAll('.size-btn');
 
         yieldSlider.addEventListener('input', (e) => {
-            currentYield = parseFloat(e.target.value);
+            let newYield = parseFloat(e.target.value);
+            // Enforce max yield to prevent browser crashes at high object counts
+            if (newYield > MAX_YIELD_KG) {
+                newYield = MAX_YIELD_KG;
+                e.target.value = MAX_YIELD_KG;
+            }
+            currentYield = newYield;
             yieldValue.textContent = currentYield;
+            updateYieldDisplay();
             calculate();
         });
+
+        function updateYieldDisplay() {
+            const weeklyEquiv = currentYield / 4;
+            const yieldWeekly = document.getElementById('yield-weekly');
+            const yieldUnit = document.getElementById('yield-unit');
+            if (currentUnit === 'metric') {
+                yieldUnit.textContent = 'kg/month';
+                yieldWeekly.textContent = `~${weeklyEquiv.toFixed(1)} kg/week equivalent`;
+            } else {
+                const monthlyLb = currentYield * KG_TO_LB;
+                const weeklyLb = weeklyEquiv * KG_TO_LB;
+                document.getElementById('yield-value').textContent = Math.round(monthlyLb);
+                yieldUnit.textContent = 'lb/month';
+                yieldWeekly.textContent = `~${weeklyLb.toFixed(1)} lb/week equivalent`;
+            }
+        }
 
         beSlider.addEventListener('input', (e) => {
             currentBE = parseInt(e.target.value);
             beValue.textContent = currentBE;
+            updateYieldPerBlock();
             calculate();
         });
 
@@ -1521,6 +2749,36 @@
                 sizeBtns.forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 currentBlockSize = parseInt(btn.dataset.size);
+                updateYieldPerBlock();
+                calculate();
+            });
+        });
+
+        // Update yield per block estimate display
+        function updateYieldPerBlock() {
+            const block = BLOCK_DIMS[currentBlockSize];
+            const beDecimal = currentBE / 100;
+            const yieldPerBlock = block.weight_kg * DRY_MASS_RATIO * beDecimal;
+            const yieldPerBlockLb = yieldPerBlock * KG_TO_LB;
+            const display = document.getElementById('yield-per-block');
+            if (display) {
+                if (currentUnit === 'metric') {
+                    display.textContent = `Est. yield: ${yieldPerBlock.toFixed(2)} kg/block`;
+                } else {
+                    display.textContent = `Est. yield: ${yieldPerBlockLb.toFixed(2)} lb/block`;
+                }
+            }
+        }
+
+        // Split selector
+        const splitBtns = document.querySelectorAll('.split-option');
+        splitBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                splitBtns.forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+                currentSplitMode = btn.dataset.split;
+                currentDays = {};  // Reset day sliders when split mode changes
+                updateSpeciesGroupBadges();
                 calculate();
             });
         });
@@ -1533,6 +2791,8 @@
                 btn.classList.add('active');
                 currentUnit = btn.dataset.unit;
                 updateBlockSizeDisplay();
+                updateYieldPerBlock();
+                updateYieldDisplay();
                 if (currentCalcData) {
                     updateDisplay(currentCalcData);
                 }
@@ -1580,28 +2840,11 @@
             });
         });
 
-        // Week selector buttons
-        const weekBtns = document.querySelectorAll('.week-btn');
-        const weekDescriptions = {
-            1: 'First batch enters fruiting chamber (no pins yet)',
-            2: 'First batch fruiting, second batch enters',
-            3: 'First batch harvested, second batch fruiting'
-        };
-
-        weekBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                weekBtns.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                currentWeek = parseInt(btn.dataset.week);
-                document.getElementById('week-description').textContent = weekDescriptions[currentWeek];
-                if (currentCalcData) {
-                    update3DViz(currentCalcData);
-                }
-            });
-        });
-
         initThreeJS();
         updateBlockSizeDisplay();
+        updateYieldPerBlock();
+        updateYieldDisplay();
+        updateSpeciesGroupBadges();
         calculate();
     </script>
 </body>
