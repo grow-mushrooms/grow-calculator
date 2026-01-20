@@ -107,6 +107,21 @@
         .size-btn .size-desc { font-size: 0.85rem; color: var(--brown-medium); margin-top: 0.25rem; }
         .size-btn.active .size-title { color: var(--forest-green); }
 
+        .species-toggle { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
+        .species-btn {
+            flex: 1; padding: 0.75rem 0.5rem;
+            border: 2px solid var(--tan);
+            border-radius: 8px;
+            background: var(--white);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--brown-dark);
+        }
+        .species-btn:hover { border-color: var(--forest-green); background: var(--cream-light); }
+        .species-btn.active { border-color: var(--forest-green); background: var(--forest-green); color: var(--white); }
+
         /* 3D Visualization */
         .viz-section { padding: 1.5rem 2rem; background: var(--cream-light); border-top: 1px solid var(--cream); }
         .viz-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
@@ -173,9 +188,10 @@
         .spec-sheet h3 { font-size: 1rem; color: var(--tan); margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.05em; }
 
         .spec-list { font-family: 'SF Mono', 'Monaco', 'Consolas', monospace; font-size: 0.9rem; line-height: 1.8; }
-        .spec-list .spec-row { display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding: 0.5rem 0; }
+        .spec-list .spec-row { display: flex; border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding: 0.5rem 0; }
         .spec-list .spec-row:last-child { border-bottom: none; }
-        .spec-list .spec-label { color: rgba(255, 255, 255, 0.7); }
+        .spec-list .spec-label { color: rgba(255, 255, 255, 0.7); flex: 1; }
+        .spec-list .spec-qty { font-weight: 600; width: 3rem; text-align: center; color: var(--tan); }
         .spec-list .spec-value { font-weight: 600; text-align: right; }
 
         .tip-box { margin-top: 1.5rem; background: rgba(69, 90, 48, 0.3); border-left: 4px solid var(--forest-green-light); border-radius: 0 8px 8px 0; padding: 1rem 1.25rem; }
@@ -221,11 +237,12 @@
                     <label>Average Weekly Harvest</label>
                     <p class="input-hint">Target fresh mushroom yield (averaged across 4-week cycle)</p>
                     <div class="slider-container">
-                        <input type="range" id="yield-slider" min="0.5" max="50" step="0.5" value="3">
-                        <div class="slider-value"><span id="yield-value">3</span> <span>kg/week avg</span></div>
+                        <input type="range" id="yield-slider" min="1" max="150" step="1" value="10">
+                        <div class="slider-value"><span id="yield-value">10</span> <span>kg/week avg</span></div>
                         <div class="slider-labels">
-                            <span>0.5 kg</span>
-                            <span>50 kg</span>
+                            <span>1 kg</span>
+                            <span>75 kg</span>
+                            <span>150 kg</span>
                         </div>
                     </div>
                 </div>
@@ -242,6 +259,19 @@
                             <div class="size-title">10 lb</div>
                             <div class="size-desc">4.5 kg · 11"×9"×9"</div>
                         </button>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Number of Species</label>
+                    <p class="input-hint">3+ species uses two separate chambers for isolation</p>
+                    <div class="species-toggle">
+                        <button class="species-btn active" data-species="1">1</button>
+                        <button class="species-btn" data-species="2">2</button>
+                        <button class="species-btn" data-species="3">3</button>
+                        <button class="species-btn" data-species="4">4</button>
+                        <button class="species-btn" data-species="5">5</button>
+                        <button class="species-btn" data-species="6">6</button>
                     </div>
                 </div>
 
@@ -330,66 +360,87 @@
                     <div class="spec-list">
                         <div class="spec-row">
                             <span class="spec-label">Target (avg)</span>
-                            <span class="spec-value" id="spec-target">3 kg/week</span>
+                            <span class="spec-qty"></span>
+                            <span class="spec-value" id="spec-target">10 kg/week</span>
+                        </div>
+                        <div class="spec-row">
+                            <span class="spec-label">Species</span>
+                            <span class="spec-qty"></span>
+                            <span class="spec-value" id="spec-species">1</span>
                         </div>
                         <div class="spec-row">
                             <span class="spec-label">Production weeks</span>
-                            <span class="spec-value" id="spec-prod-weeks">~4 kg/wk for 3 weeks</span>
+                            <span class="spec-qty"></span>
+                            <span class="spec-value" id="spec-prod-weeks">~13 kg/wk for 3 weeks</span>
                         </div>
                         <div class="spec-row">
                             <span class="spec-label">Block size</span>
+                            <span class="spec-qty"></span>
                             <span class="spec-value" id="spec-block-size">5 lb (2.3 kg)</span>
                         </div>
                         <div class="spec-row">
                             <span class="spec-label">Biological efficiency</span>
+                            <span class="spec-qty"></span>
                             <span class="spec-value" id="spec-be">70%</span>
                         </div>
                         <div class="spec-row">
                             <span class="spec-label">Yield per block</span>
+                            <span class="spec-qty"></span>
                             <span class="spec-value" id="spec-yield-block">0.64 kg</span>
                         </div>
                         <div class="spec-row">
                             <span class="spec-label">Blocks per batch</span>
-                            <span class="spec-value" id="spec-blocks">19</span>
+                            <span class="spec-qty" id="spec-blocks-qty"></span>
+                            <span class="spec-value" id="spec-blocks">62</span>
                         </div>
                         <div class="spec-row">
                             <span class="spec-label">Chamber</span>
-                            <span class="spec-value" id="spec-chamber">2' × 2' × 4'</span>
+                            <span class="spec-qty" id="spec-chamber-qty"></span>
+                            <span class="spec-value" id="spec-chamber">4' × 4' × 6.5'</span>
                         </div>
                         <div class="spec-row">
-                            <span class="spec-label">Capacity</span>
-                            <span class="spec-value" id="spec-capacity">24 blocks (79% full)</span>
+                            <span class="spec-label">Capacity (per chamber)</span>
+                            <span class="spec-qty"></span>
+                            <span class="spec-value" id="spec-capacity">72 blocks (86% used)</span>
                         </div>
                         <div class="spec-row">
-                            <span class="spec-label">Shelving</span>
+                            <span class="spec-label">Shelving (per chamber)</span>
+                            <span class="spec-qty" id="spec-shelving-qty"></span>
                             <span class="spec-value" id="spec-shelving">1× rack, 4 levels</span>
                         </div>
                         <div class="spec-row">
-                            <span class="spec-label">FAE target</span>
-                            <span class="spec-value" id="spec-fae">6 exch/hr → 45 CFM</span>
+                            <span class="spec-label">FAE target (per chamber)</span>
+                            <span class="spec-qty"></span>
+                            <span class="spec-value" id="spec-fae">8 exch/hr → 17 CFM</span>
                         </div>
                         <div class="spec-row">
                             <span class="spec-label">Fan (w/ ducting)</span>
-                            <span class="spec-value" id="spec-fan">6" inline (~400 CFM rated)</span>
+                            <span class="spec-qty" id="spec-fan-qty"></span>
+                            <span class="spec-value" id="spec-fan">4" inline (~108 CFM rated)</span>
                         </div>
                         <div class="spec-row">
-                            <span class="spec-label">Humidity</span>
+                            <span class="spec-label">Humidity controller</span>
+                            <span class="spec-qty" id="spec-humidity-qty"></span>
                             <span class="spec-value">85% RH (Inkbird IHC-200)</span>
                         </div>
                         <div class="spec-row">
                             <span class="spec-label">Fogger</span>
+                            <span class="spec-qty" id="spec-fogger-qty"></span>
                             <span class="spec-value" id="spec-fogger">House of Hydro 1-disc</span>
                         </div>
                         <div class="spec-row">
                             <span class="spec-label">Duty Cycle</span>
+                            <span class="spec-qty"></span>
                             <span class="spec-value" id="spec-duty">~7%</span>
                         </div>
                         <div class="spec-row">
                             <span class="spec-label">Disc Life</span>
+                            <span class="spec-qty"></span>
                             <span class="spec-value" id="spec-life">4-6 years</span>
                         </div>
                         <div class="spec-row">
                             <span class="spec-label">Temperature</span>
+                            <span class="spec-qty"></span>
                             <span class="spec-value">18-21°C</span>
                         </div>
                     </div>
@@ -477,9 +528,10 @@
         // STATE
         // ============================================================
 
-        let currentYield = 3;
+        let currentYield = 10;
         let currentBlockSize = 5;
         let currentBE = 70;
+        let currentSpecies = 1;
         let currentWeek = 1;
         let currentCalcData = null;
 
@@ -877,7 +929,7 @@
                 tentGroup.remove(tentGroup.children[0]);
             }
 
-            const { tent, config, blocksNeeded } = data;
+            const { tent, config, blocksNeeded, blocksPerTent, numTents } = data;
             const block = BLOCK_DIMS[currentBlockSize];
 
             // Scale: 1 unit = 1 foot for the visualization
@@ -885,154 +937,168 @@
             const d = tent.d;
             const h = tent.h;
 
-            // Tent wireframe
-            const tentGeom = new THREE.BoxGeometry(w, h, d);
-            const tentEdges = new THREE.EdgesGeometry(tentGeom);
-            const tentLine = new THREE.LineSegments(tentEdges, new THREE.LineBasicMaterial({ color: 0xd9bf90, linewidth: 2 }));
-            tentLine.position.y = h / 2;
-            tentGroup.add(tentLine);
-
-            // Semi-transparent walls
-            const wallMat = new THREE.MeshBasicMaterial({ color: 0xd9bf90, transparent: true, opacity: 0.08, side: THREE.DoubleSide });
-            const walls = new THREE.Mesh(tentGeom, wallMat);
-            walls.position.y = h / 2;
-            tentGroup.add(walls);
-
-            // Dimension labels
-            tentGroup.add(createTextSprite(`${tent.w}'`, new THREE.Vector3(0, -0.3, d/2 + 0.3)));
-            tentGroup.add(createTextSprite(`${tent.d}'`, new THREE.Vector3(w/2 + 0.3, -0.3, 0)));
-            tentGroup.add(createTextSprite(`${tent.h}'`, new THREE.Vector3(w/2 + 0.3, h/2, -d/2 - 0.2)));
-
             // Block dimensions in feet
             const blockW = block.w / 12;
             const blockD = block.d / 12;
             const blockH = block.h / 12;
             const spacing = BLOCK_SPACING / 12;
-            const shelfDepthFt = SHELF_DEPTH / 12;
             const shelfSpacingFt = SHELF_SPACING / 12;
             const shelfBottomFt = SHELF_BOTTOM / 12;
 
-            // Shelving and blocks
+            // Materials (shared across all tents)
             const shelfMat = new THREE.MeshBasicMaterial({ color: 0x888888, transparent: true, opacity: 0.5 });
-            const blockMat = new THREE.MeshStandardMaterial({
-                color: 0xf8f6f0,
-                roughness: 0.9,
-                metalness: 0.0
-            });
+            const blockMat = new THREE.MeshStandardMaterial({ color: 0xf8f6f0, roughness: 0.9, metalness: 0.0 });
+            const wallMat = new THREE.MeshBasicMaterial({ color: 0xd9bf90, transparent: true, opacity: 0.08, side: THREE.DoubleSide });
+            const legMat = new THREE.MeshBasicMaterial({ color: 0x666666 });
 
-            // Pre-create block geometry (reuse for all blocks)
+            // Pre-create geometries (reuse for all blocks/tents)
             const blockGeometry = createSubstrateBlock(blockW, blockH, blockD);
+            const tentGeom = new THREE.BoxGeometry(w, h, d);
+            const tentEdges = new THREE.EdgesGeometry(tentGeom);
+            const legGeom = new THREE.CylinderGeometry(0.02, 0.02, shelfBottomFt);
 
-            let blocksPlaced = 0;
+            // Calculate tent positions (side by side with gap)
+            const tentGap = 1.5; // feet between tents
+            const totalWidth = numTents > 1 ? (w * 2 + tentGap) : w;
+            const tentOffsets = numTents > 1
+                ? [-(w + tentGap) / 2, (w + tentGap) / 2]
+                : [0];
 
-            config.shelves.forEach(shelf => {
-                const shelfW = shelf.w / 12;
-                const shelfD = shelf.d / 12;
-                const shelfX = shelf.x / 12;
-                const shelfZ = shelf.z / 12;
+            // Render each tent
+            tentOffsets.forEach((xOffset, tentIndex) => {
+                // Tent wireframe
+                const tentLine = new THREE.LineSegments(tentEdges.clone(), new THREE.LineBasicMaterial({ color: 0xd9bf90, linewidth: 2 }));
+                tentLine.position.set(xOffset, h / 2, 0);
+                tentGroup.add(tentLine);
 
-                for (let level = 0; level < config.numLevels; level++) {
-                    const shelfY = shelfBottomFt + level * shelfSpacingFt;
+                // Semi-transparent walls
+                const walls = new THREE.Mesh(tentGeom.clone(), wallMat);
+                walls.position.set(xOffset, h / 2, 0);
+                tentGroup.add(walls);
 
-                    // Draw shelf (thin box)
-                    const shelfGeom = new THREE.BoxGeometry(shelfW, 0.02, shelfD);
-                    const shelfMesh = new THREE.Mesh(shelfGeom, shelfMat);
-                    shelfMesh.position.set(shelfX, shelfY, shelfZ);
-                    tentGroup.add(shelfMesh);
+                // Dimension labels (only for first tent or single tent)
+                if (tentIndex === 0 || numTents === 1) {
+                    tentGroup.add(createTextSprite(`${tent.w}'`, new THREE.Vector3(xOffset, -0.3, d/2 + 0.3)));
+                    tentGroup.add(createTextSprite(`${tent.d}'`, new THREE.Vector3(xOffset + w/2 + 0.3, -0.3, 0)));
+                    tentGroup.add(createTextSprite(`${tent.h}'`, new THREE.Vector3(xOffset + w/2 + 0.3, h/2, -d/2 - 0.2)));
+                }
 
-                    // Draw shelf supports (4 legs)
-                    if (level === 0) {
-                        const legMat = new THREE.MeshBasicMaterial({ color: 0x666666 });
-                        const legGeom = new THREE.CylinderGeometry(0.02, 0.02, shelfBottomFt);
-                        [[1,1], [1,-1], [-1,1], [-1,-1]].forEach(([sx, sz]) => {
-                            const leg = new THREE.Mesh(legGeom, legMat);
-                            leg.position.set(shelfX + sx * (shelfW/2 - 0.05), shelfBottomFt/2, shelfZ + sz * (shelfD/2 - 0.05));
-                            tentGroup.add(leg);
-                        });
-                    }
+                // Tent label for dual tents
+                if (numTents > 1) {
+                    tentGroup.add(createTextSprite(`Tent ${tentIndex + 1}`, new THREE.Vector3(xOffset, h + 0.3, 0), 0.2));
+                }
 
-                    // Place blocks on this shelf
-                    for (let row = 0; row < shelf.blocksDeep && blocksPlaced < blocksNeeded; row++) {
-                        for (let col = 0; col < shelf.blocksWide && blocksPlaced < blocksNeeded; col++) {
-                            // Determine if this block should be shown and if it should have mushrooms
-                            // based on current week (staggered batch system)
-                            const blockIndex = blocksPlaced;
-                            const halfPoint = Math.ceil(blocksNeeded / 2);
-                            const isFirstHalf = blockIndex < halfPoint;
+                let blocksPlaced = 0;
+                const blocksForThisTent = blocksPerTent;
 
-                            let showBlock = false;
-                            let showMushrooms = false;
+                config.shelves.forEach(shelf => {
+                    const shelfW = shelf.w / 12;
+                    const shelfD = shelf.d / 12;
+                    const shelfX = shelf.x / 12 + xOffset;
+                    const shelfZ = shelf.z / 12;
 
-                            if (currentWeek === 1) {
-                                // Week 1: first half enters, no mushrooms yet
-                                showBlock = isFirstHalf;
-                                showMushrooms = false;
-                            } else if (currentWeek === 2) {
-                                // Week 2: all blocks, first half fruiting
-                                showBlock = true;
-                                showMushrooms = isFirstHalf;
-                            } else {
-                                // Week 3: all blocks, second half fruiting
-                                showBlock = true;
-                                showMushrooms = !isFirstHalf;
-                            }
+                    for (let level = 0; level < config.numLevels; level++) {
+                        const shelfY = shelfBottomFt + level * shelfSpacingFt;
 
-                            if (showBlock) {
-                                const blockMesh = new THREE.Mesh(blockGeometry, blockMat);
+                        // Draw shelf (thin box)
+                        const shelfGeom = new THREE.BoxGeometry(shelfW, 0.02, shelfD);
+                        const shelfMesh = new THREE.Mesh(shelfGeom, shelfMat);
+                        shelfMesh.position.set(shelfX, shelfY, shelfZ);
+                        tentGroup.add(shelfMesh);
 
-                                const bx = shelfX - shelfW/2 + (blockW + spacing)/2 + col * (blockW + spacing);
-                                const bz = shelfZ - shelfD/2 + (blockD + spacing)/2 + row * (blockD + spacing);
-                                const by = shelfY + blockH/2 + 0.02;
+                        // Draw shelf supports (4 legs)
+                        if (level === 0) {
+                            [[1,1], [1,-1], [-1,1], [-1,-1]].forEach(([sx, sz]) => {
+                                const leg = new THREE.Mesh(legGeom.clone(), legMat);
+                                leg.position.set(shelfX + sx * (shelfW/2 - 0.05), shelfBottomFt/2, shelfZ + sz * (shelfD/2 - 0.05));
+                                tentGroup.add(leg);
+                            });
+                        }
 
-                                blockMesh.position.set(bx, by, bz);
-                                tentGroup.add(blockMesh);
+                        // Place blocks on this shelf
+                        for (let row = 0; row < shelf.blocksDeep && blocksPlaced < blocksForThisTent; row++) {
+                            for (let col = 0; col < shelf.blocksWide && blocksPlaced < blocksForThisTent; col++) {
+                                // Determine if this block should be shown and if it should have mushrooms
+                                // based on current week (staggered batch system)
+                                const blockIndex = blocksPlaced;
+                                const halfPoint = Math.ceil(blocksForThisTent / 2);
+                                const isFirstHalf = blockIndex < halfPoint;
 
-                                if (showMushrooms) {
-                                    // Add mushroom cluster - face towards center of tent
-                                    const facing = shelf.facing || 0;
-                                    const mushrooms = createMushroomCluster(blockW, blockH, blockD, facing);
+                                let showBlock = false;
+                                let showMushrooms = false;
 
-                                    // Position mushrooms on the side facing the center
-                                    // Use negative sin for correct X direction
-                                    const mushroomOffset = blockD / 2 + 0.02;
-                                    const mx = bx - Math.sin(facing) * mushroomOffset;
-                                    const mz = bz + Math.cos(facing) * mushroomOffset;
-                                    mushrooms.position.set(mx, by - blockH * 0.1, mz);
-                                    tentGroup.add(mushrooms);
+                                if (currentWeek === 1) {
+                                    showBlock = isFirstHalf;
+                                    showMushrooms = false;
+                                } else if (currentWeek === 2) {
+                                    showBlock = true;
+                                    showMushrooms = isFirstHalf;
+                                } else {
+                                    showBlock = true;
+                                    showMushrooms = !isFirstHalf;
                                 }
-                            }
 
-                            blocksPlaced++;
+                                if (showBlock) {
+                                    const blockMesh = new THREE.Mesh(blockGeometry, blockMat);
+
+                                    const bx = shelfX - shelfW/2 + (blockW + spacing)/2 + col * (blockW + spacing);
+                                    const bz = shelfZ - shelfD/2 + (blockD + spacing)/2 + row * (blockD + spacing);
+                                    const by = shelfY + blockH/2 + 0.02;
+
+                                    blockMesh.position.set(bx, by, bz);
+                                    tentGroup.add(blockMesh);
+
+                                    if (showMushrooms) {
+                                        const facing = shelf.facing || 0;
+                                        const mushrooms = createMushroomCluster(blockW, blockH, blockD, facing);
+                                        const mushroomOffset = blockD / 2 + 0.02;
+                                        const mx = bx - Math.sin(facing) * mushroomOffset;
+                                        const mz = bz + Math.cos(facing) * mushroomOffset;
+                                        mushrooms.position.set(mx, by - blockH * 0.1, mz);
+                                        tentGroup.add(mushrooms);
+                                    }
+                                }
+
+                                blocksPlaced++;
+                            }
                         }
                     }
-                }
+                });
             });
 
-            // Floor grid
-            const gridHelper = new THREE.GridHelper(Math.max(w, d), Math.max(w, d) * 2, 0x444444, 0x333333);
+            // Floor grid (spans all tents)
+            const gridSize = Math.max(totalWidth, d) * 1.2;
+            const gridHelper = new THREE.GridHelper(gridSize, Math.round(gridSize * 2), 0x444444, 0x333333);
             gridHelper.position.y = 0.001;
             tentGroup.add(gridHelper);
 
-            // Adjust camera
-            const maxDim = Math.max(w, d, h);
-            camera.position.set(maxDim * 1.3, maxDim * 1.0, maxDim * 1.5);
+            // Adjust camera for dual tents
+            const maxDim = Math.max(totalWidth, d, h);
+            const cameraDistance = numTents > 1 ? maxDim * 1.1 : maxDim * 1.3;
+            camera.position.set(cameraDistance, maxDim * 0.9, cameraDistance * 1.1);
             camera.lookAt(0, h * 0.35, 0);
 
             // Update stats based on week
-            const halfPoint = Math.ceil(blocksNeeded / 2);
-            let visibleBlocks, fruitingBlocks;
+            const halfPoint = Math.ceil(blocksPerTent / 2);
+            let visibleBlocksPerTent, fruitingBlocksPerTent;
             if (currentWeek === 1) {
-                visibleBlocks = halfPoint;
-                fruitingBlocks = 0;
+                visibleBlocksPerTent = halfPoint;
+                fruitingBlocksPerTent = 0;
             } else if (currentWeek === 2) {
-                visibleBlocks = blocksNeeded;
-                fruitingBlocks = halfPoint;
+                visibleBlocksPerTent = blocksPerTent;
+                fruitingBlocksPerTent = halfPoint;
             } else {
-                visibleBlocks = blocksNeeded;
-                fruitingBlocks = blocksNeeded - halfPoint;
+                visibleBlocksPerTent = blocksPerTent;
+                fruitingBlocksPerTent = blocksPerTent - halfPoint;
             }
-            document.getElementById('viz-stats').textContent =
-                `Week ${currentWeek}: ${visibleBlocks} blocks, ${fruitingBlocks} fruiting`;
+
+            if (numTents > 1) {
+                document.getElementById('viz-stats').textContent =
+                    `Week ${currentWeek}: ${visibleBlocksPerTent * numTents} blocks (${visibleBlocksPerTent}/tent), ${fruitingBlocksPerTent * numTents} fruiting`;
+            } else {
+                document.getElementById('viz-stats').textContent =
+                    `Week ${currentWeek}: ${visibleBlocksPerTent} blocks, ${fruitingBlocksPerTent} fruiting`;
+            }
         }
 
         // ============================================================
@@ -1048,8 +1114,12 @@
             const blocksNeeded = yieldPerBlock > 0 ? Math.ceil(totalCycleYield / yieldPerBlock) : 0;
             const prodWeekYield = blocksNeeded > 0 ? (blocksNeeded * yieldPerBlock) / PRODUCTION_WEEKS : 0;
 
-            // Find best tent based on actual capacity
-            const { tent, config } = findBestTent(blocksNeeded, currentBlockSize);
+            // Determine if we need dual tents (3+ species)
+            const numTents = currentSpecies >= 3 ? 2 : 1;
+            const blocksPerTent = Math.ceil(blocksNeeded / numTents);
+
+            // Find best tent based on blocks per tent
+            const { tent, config } = findBestTent(blocksPerTent, currentBlockSize);
 
             // FAE calculation - exchange rate scales with tent size
             // Small: 4-6/hr, Medium: 6-8/hr, Large: 8-12/hr
@@ -1095,8 +1165,8 @@
             }
 
             const calcData = {
-                block, yieldPerBlock, blocksNeeded, prodWeekYield,
-                tent, config, ft3, m3,
+                block, yieldPerBlock, blocksNeeded, blocksPerTent, prodWeekYield,
+                tent, config, ft3, m3, numTents,
                 exchangesPerHour, targetCfm, fanRatedCfm, fanRec, fanSize,
                 fogger, dutyCycle, discLifeMonthsMin, discLifeMonthsMax,
                 runHoursPerDay
@@ -1108,7 +1178,7 @@
         }
 
         function updateDisplay(data) {
-            const { block, yieldPerBlock, blocksNeeded, prodWeekYield, tent, config, ft3, m3,
+            const { block, yieldPerBlock, blocksNeeded, blocksPerTent, prodWeekYield, tent, config, ft3, m3, numTents,
                     exchangesPerHour, targetCfm, fanRatedCfm, fanRec, fanSize,
                     fogger, dutyCycle, discLifeMonthsMin, discLifeMonthsMax, runHoursPerDay } = data;
 
@@ -1116,34 +1186,60 @@
             document.getElementById('cycle-info').textContent = `~${prodWeekYield.toFixed(1)} kg weeks 1-3, week 4 cleaning`;
 
             document.getElementById('blocks-value').textContent = blocksNeeded;
-            document.getElementById('blocks-detail').textContent = `capacity: ${config.capacity}`;
+            document.getElementById('blocks-detail').textContent = numTents > 1
+                ? `${blocksPerTent}/tent × ${numTents} tents`
+                : `capacity: ${config.capacity}`;
 
-            document.getElementById('chamber-value').textContent = `${ft3} ft³`;
-            document.getElementById('chamber-detail').textContent = tent.dims;
+            const totalFt3 = ft3 * numTents;
+            document.getElementById('chamber-value').textContent = numTents > 1
+                ? `${totalFt3} ft³`
+                : `${ft3} ft³`;
+            document.getElementById('chamber-detail').textContent = numTents > 1
+                ? `${numTents}× ${tent.dims}`
+                : tent.dims;
 
             document.getElementById('fae-value').textContent = fanSize;
-            document.getElementById('fae-detail').textContent = `${Math.round(fanRatedCfm)} CFM rated`;
+            document.getElementById('fae-detail').textContent = numTents > 1
+                ? `${numTents}× ${Math.round(fanRatedCfm)} CFM`
+                : `${Math.round(fanRatedCfm)} CFM rated`;
 
             document.getElementById('fogger-value').textContent = fogger.name;
-            document.getElementById('fogger-detail').textContent = `~${Math.round(dutyCycle)}% duty cycle`;
+            document.getElementById('fogger-detail').textContent = numTents > 1
+                ? `${numTents}× ~${Math.round(dutyCycle)}% duty`
+                : `~${Math.round(dutyCycle)}% duty cycle`;
 
+            // Spec sheet
             document.getElementById('spec-target').textContent = `${currentYield} kg/week`;
+            document.getElementById('spec-species').textContent = currentSpecies;
             document.getElementById('spec-prod-weeks').textContent = `~${prodWeekYield.toFixed(1)} kg/wk for 3 weeks`;
             document.getElementById('spec-block-size').textContent = `${block.label} (${block.w}"×${block.d}"×${block.h}")`;
             document.getElementById('spec-be').textContent = `${currentBE}%`;
             document.getElementById('spec-yield-block').textContent = `${yieldPerBlock.toFixed(2)} kg`;
-            document.getElementById('spec-blocks').textContent = blocksNeeded;
-            document.getElementById('spec-chamber').textContent = `${tent.dims} (${ft3} ft³)`;
 
-            const utilizationPct = Math.round((blocksNeeded / config.capacity) * 100);
+            // Blocks with quantity
+            document.getElementById('spec-blocks').textContent = numTents > 1 ? `${blocksPerTent} per tent` : blocksNeeded;
+            document.getElementById('spec-blocks-qty').textContent = numTents > 1 ? `×${numTents}` : '';
+
+            // Chamber with quantity
+            document.getElementById('spec-chamber').textContent = `${tent.dims} (${ft3} ft³)`;
+            document.getElementById('spec-chamber-qty').textContent = numTents > 1 ? `×${numTents}` : '';
+
+            const utilizationPct = Math.round((blocksPerTent / config.capacity) * 100);
             document.getElementById('spec-capacity').textContent = `${config.capacity} blocks (${utilizationPct}% used)`;
 
             const numRacks = config.shelves.length;
             document.getElementById('spec-shelving').textContent = `${numRacks}× rack${numRacks > 1 ? 's' : ''}, ${config.numLevels} levels`;
+            document.getElementById('spec-shelving-qty').textContent = numTents > 1 ? `×${numTents}` : '';
 
             document.getElementById('spec-fae').textContent = `${exchangesPerHour} exch/hr → ${Math.round(targetCfm)} CFM target`;
             document.getElementById('spec-fan').textContent = `${fanRec} (~${Math.round(fanRatedCfm)} CFM rated)`;
+            document.getElementById('spec-fan-qty').textContent = numTents > 1 ? `×${numTents}` : '';
+
+            document.getElementById('spec-humidity-qty').textContent = numTents > 1 ? `×${numTents}` : '';
+
             document.getElementById('spec-fogger').textContent = `${fogger.fullName}`;
+            document.getElementById('spec-fogger-qty').textContent = numTents > 1 ? `×${numTents}` : '';
+
             document.getElementById('spec-duty').textContent = `~${Math.round(dutyCycle)}% (${runHoursPerDay.toFixed(1)} hrs/day)`;
 
             let discLifeText = discLifeMonthsMin >= 24
@@ -1157,6 +1253,8 @@
                 tipText.textContent = "Set biological efficiency above 0% to calculate block requirements.";
             } else if (yieldPerBlock < 0.1) {
                 tipText.textContent = "Very low BE results in minimal yield per block.";
+            } else if (numTents > 1) {
+                tipText.textContent = `${currentSpecies} species split across ${numTents} chambers for isolation. Each tent runs independently.`;
             } else if (utilizationPct > 90) {
                 tipText.textContent = "Tent is nearly full. Good efficiency, but leave room for airflow.";
             } else if (utilizationPct < 50 && blocksNeeded > 10) {
@@ -1172,8 +1270,13 @@
             const specs = [];
             document.querySelectorAll('.spec-row').forEach(row => {
                 const label = row.querySelector('.spec-label').textContent;
+                const qty = row.querySelector('.spec-qty')?.textContent || '';
                 const value = row.querySelector('.spec-value').textContent;
-                specs.push(`${label}: ${value}`);
+                if (qty) {
+                    specs.push(`${label}: ${qty} ${value}`);
+                } else {
+                    specs.push(`${label}: ${value}`);
+                }
             });
 
             const text = `FRUITING CHAMBER SPECS (BATCH MODE)\n${'='.repeat(40)}\n${specs.join('\n')}\n\nCalculated at growcalc.heartwoodmushrooms.ca`;
@@ -1212,6 +1315,17 @@
                 sizeBtns.forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 currentBlockSize = parseInt(btn.dataset.size);
+                calculate();
+            });
+        });
+
+        // Species selector buttons
+        const speciesBtns = document.querySelectorAll('.species-btn');
+        speciesBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                speciesBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentSpecies = parseInt(btn.dataset.species);
                 calculate();
             });
         });
